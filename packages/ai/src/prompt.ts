@@ -76,12 +76,31 @@ export interface AssembledPrompt {
 /**
  * The minimum a cache entry may cover, in characters.
  *
- * Providers impose a minimum cacheable length (around 1,000 tokens for some
- * models) and reject or silently ignore anything shorter. Below it, requesting
- * a cache write pays the write premium for nothing. Four characters per token
- * is the usual English approximation.
+ * Providers impose a minimum cacheable length and reject or silently ignore
+ * anything shorter, so below it a cache write pays the premium for nothing.
+ * Four characters per token is the usual English approximation.
+ *
+ * **The floor is per model, not per vendor, and the largest one governs.**
+ * Measured against published minimums:
+ *
+ *   OpenAI                  1,024 tokens
+ *   Anthropic, larger models 1,024 tokens
+ *   Anthropic Haiku          2,048 tokens
+ *
+ * `routeRole()` sends the *majority* of traffic to `fast`, which is Haiku —
+ * so a floor set from the 1,024 figure would decline to cache on exactly the
+ * path that carries most requests, or request a cache the provider ignores.
+ * 2,048 tokens is the honest floor, and a prefix above it caches everywhere.
+ *
+ * A prompt sitting just under this does not fail. It silently stops caching,
+ * which is why `prompt.builder.ts` in the API asserts its own prefix clears it.
  */
-export const MIN_CACHEABLE_CHARS = 4_000;
+export const MIN_CACHEABLE_TOKENS = 2_048;
+
+/** Characters per token, the usual English approximation. */
+export const CHARS_PER_TOKEN = 4;
+
+export const MIN_CACHEABLE_CHARS = MIN_CACHEABLE_TOKENS * CHARS_PER_TOKEN;
 
 /**
  * Assemble segments into a prompt.

@@ -5,6 +5,7 @@ import { migration0003 } from './0003-auth-tables';
 import { migration0004 } from './0004-text-search';
 import { migration0005 } from './0005-ingest-ledger';
 import { migration0006 } from './0006-translations';
+import { migration0007 } from './0007-zedek';
 
 /**
  * The migration registry, in version order.
@@ -20,4 +21,5 @@ export const MIGRATIONS: readonly Migration[] = [
   migration0004,
   migration0005,
   migration0006,
+  migration0007,
 ];

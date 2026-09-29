@@ -35,6 +35,12 @@ importers:
       '@nestjs/throttler':
         specifier: ^6.7.0
         version: 6.7.0(@nestjs/common@12.0.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)
+      '@scrinode/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
+      '@scrinode/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@scrinode/validation':
         specifier: workspace:*
         version: link:../../packages/validation
