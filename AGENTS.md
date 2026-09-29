@@ -824,6 +824,55 @@ getWorkspaceContext()
 getUserNotes()
 ```
 
+## What is implemented
+
+`apps/api/src/zedek` holds the orchestration; `packages/ai` holds the provider
+abstraction. Two stages carry most of the weight, and both are enforced by test
+rather than convention.
+
+**The intent router decides whether a model is involved at all.** §15 puts AI
+last, and `routeQuestion()` is where that becomes real: a bare reference or a
+short keyword phrase is refused by Zedek and sent back to the reader or to
+search. A free answer is the cheapest kind, and generating one is pure waste.
+The router is rule-based — asking a model which model to use pays for an
+inference to save one and adds latency ahead of §31's 2s target.
+
+**Citation validation runs after generation, against this turn's retrieval.**
+A Scripture citation must trace to a unit that was in the context the model was
+given — not merely to a unit that exists. A real verse recalled unaided is
+still fabricated, because the grounding is what makes it checkable (§1's VERIFY
+step). Invalid citations are **dropped, never repaired**: guessing which unit a
+model meant would invent the grounding this exists to require.
+
+A citation's reference, translation and text come from the retrieved row, never
+from the response. The model supplies only the unit id.
+
+Rules that hold here:
+
+- **When retrieval returns nothing relevant, no provider call is made.** Zedek
+  says it found nothing. Generating anyway would produce an answer from the
+  model's own weights, which §2.2 forbids, and would cost money to do it.
+- **The relevance floor is measured, not guessed.** Observed scores for correct
+  answers ran 0.47-0.68 across ten translations; a correct Leviticus result
+  scored 0.47. A cutoff at 0.5 would have discarded it, so the floor sits
+  below.
+- **Ownership is checked before any work and any token.** §33, and the check is
+  in the repository's SQL rather than after the fetch, so a service cannot
+  forget it. A missing row and another reader's row are the same error
+  deliberately — distinguishing them leaks which ids exist.
+- **Reader identity comes from the session, never the request body.** The
+  `ReaderGuard` resolves Auth.js's session cookie against the `sessions` table;
+  with the database strategy the record is the authority, so no secret is
+  needed. It reads no privilege fields, so there is nothing to escalate with
+  (§27.3).
+- **Cost and token counts are recorded per message and not returned to
+  readers.** §34 wants them visible to operators; a per-answer price in the
+  interface would change how people ask questions.
+- **Without a key, the provider is a loud fake.** It states that it is not a
+  real answer rather than returning plausible prose — a reader cannot tell
+  fabricated text from a grounded one, which is precisely §2.2's concern. The
+  API still boots: a missing Zedek key must not take down the reader.
+
 ---
 
 # 17. AI Provider Abstraction

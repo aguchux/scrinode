@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { loadEnv } from './config/env.config';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { ZedekModule } from './zedek/zedek.module';
 
 /**
  * Root module.
@@ -36,6 +37,7 @@ import { HealthModule } from './health/health.module';
 
     DatabaseModule,
     HealthModule,
+    ZedekModule,
   ],
   providers: [
     {
