@@ -914,6 +914,33 @@ Rules:
   ordinary traffic growth. `cacheHitRate()` is the number to watch — near zero
   on a warm conversation means the ordering is broken.
 
+**The two vendors request caching differently, and that is why the ordering
+lives in the prompt rather than in an adapter.**
+
+```text
+Anthropic   explicit — a cache_control marker on the last cacheable block,
+            and nothing is cached without one. Charges 1.25x to write an
+            entry, so a short prefix costs more than not caching.
+OpenAI      implicit — matches leading tokens automatically, with nothing in
+            the request to say whether it worked. No write premium.
+```
+
+Consequences worth keeping:
+
+- **An adapter must not reorder or reformat what `assemble()` produced.** A
+  convenience like sorting messages or trimming whitespace breaks OpenAI's
+  prefix match silently.
+- **Exactly one `cache_control` marker.** Marking every block requests several
+  entries and pays several write premiums for one prefix.
+- **OpenAI's `prompt_tokens` is the total, cached included.** Reading it as
+  uncached input double-counts and reports a cached turn as *more* expensive
+  than an uncached one. Asserted by test.
+- **A streamed OpenAI call reports no usage unless asked.**
+  `stream_options.include_usage` is required, or §34 is blind to exactly the
+  requests that stream.
+- **A vendor error body never reaches the caller** (§33). It can echo the
+  prompt, and prompts carry the reader's own notes.
+
 **Routing is the other order-of-magnitude lever.** `reasoning` costs roughly
 ten times `fast`, so `routeRole()` sends restatement to `fast` and reserves
 `reasoning` for what §23 actually needs it for: contested theology, comparison
