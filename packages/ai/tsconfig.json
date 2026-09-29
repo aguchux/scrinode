@@ -1,0 +1,14 @@
+{
+  "extends": "@scrinode/config/tsconfig/library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    // AbortSignal is a Node global (§18 requires cancellation). The shared
+    // preset declares only ES2022, so the types come from @types/node rather
+    // than from widening lib to DOM, which would also pull in `window` and
+    // `document` in a package that must never touch either.
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

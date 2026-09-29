@@ -876,6 +876,52 @@ long-context → large-context model
 
 No business logic should depend on vendor-specific response formats.
 
+## Prompt ordering is a cost contract
+
+`packages/ai` assembles prompts from ordered segments rather than letting
+callers concatenate strings, and the reason is money.
+
+Every provider's prompt cache matches on a **prefix**. A cache entry is used
+only while the leading bytes are byte-identical to an earlier request, and the
+match stops at the first difference. So the saving — 70-80% of input tokens on
+a multi-turn conversation — is decided entirely by ordering: stable content
+first, variable content last.
+
+Put the reader's question or the retrieved units early and the cache never
+hits, at roughly 4x the cost, **with no error and no warning**. That silence is
+why this is a type rather than a convention:
+
+```text
+Stability.Fixed         system prompt, §23 structure, citation rules
+Stability.Study         a Study's memory, sources, Scripture range (§3.3)
+Stability.Conversation  earlier turns — append-only, so its prefix survives
+Stability.Turn          retrieved units, and the question itself
+```
+
+Rules:
+
+- **Callers choose segments, never their order.** `assemble()` sorts by
+  stability, stably, so ordering within a tier stays the caller's.
+- **Do not cache below the provider minimum.** Writing a cache entry costs
+  *more* than an uncached request, so a short prefix pays a premium it cannot
+  repay. `MIN_CACHEABLE_CHARS` is the floor and `cacheBoundary` returns 0 when
+  it is not met.
+- **Never replay a raw transcript** (§3.3). It grows linearly, so turn 30
+  costs five times turn 5. Summarised Study memory stays flat and cacheable.
+- **Account for the three input classes separately.** Cached, cache-write and
+  full-rate tokens are billed differently; folding them together hides the
+  largest saving in the system, and a caching regression then looks like
+  ordinary traffic growth. `cacheHitRate()` is the number to watch — near zero
+  on a warm conversation means the ordering is broken.
+
+**Routing is the other order-of-magnitude lever.** `reasoning` costs roughly
+ten times `fast`, so `routeRole()` sends restatement to `fast` and reserves
+`reasoning` for what §23 actually needs it for: contested theology, comparison
+and thematic tracing, where a weaker model picks one reading and sounds
+certain. Intent classes answered from Postgres — `reference_query`,
+`keyword_query`, `phrase_query` (§14.1) — never reach a model at all, and a
+free answer is the cheapest kind.
+
 ---
 
 # 18. Zedek Streaming
