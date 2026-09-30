@@ -379,6 +379,38 @@ Avoid:
 - Overly futuristic UI that harms reading.
 - Dense enterprise-dashboard clutter.
 
+## Type
+
+```text
+Scripture, headings   Source Serif 4    --font-scripture
+Interface             Inter             --font-ui
+```
+
+**Source Serif 4** carries Scripture and headings. Adobe drew it for long-form
+reading, and it is open where a transitional serif like Georgia is closed —
+rounder counters, a gentler axis, more air between the strokes. **Inter**
+carries the interface, because a landing page spends most of its type at
+11-14px and Inter was designed for exactly that.
+
+Both are loaded by `app/fonts.ts` through `next/font`, per app. Rules:
+
+- **Self-hosted, never a stylesheet link to a font CDN.** The reader's CSP is
+  `font-src 'self'`, and widening it would also mean a third party learning who
+  is reading Scripture.
+- **`display: 'swap'`, never `block`.** A blank page while a font loads fails
+  anyone on a slow connection, and §31 targets a usable shell in under 2s.
+- **Do not set `weight`.** Both are variable fonts; naming discrete weights
+  makes `next/font` emit a static file per weight instead of one covering the
+  range.
+- **Keep the system stack after the variable** in `--font-scripture` and
+  `--font-ui`. It is what renders before the font arrives and if it never
+  arrives.
+- The backoffice loads Inter only. It has no Scripture surface (§51), so a
+  reading serif would be weight downloaded for nothing.
+
+Measured: three preloaded files, ~147 KB, with `next/font`'s size-adjusted
+fallback so the swap does not move the page.
+
 ## Light theme
 
 ```text

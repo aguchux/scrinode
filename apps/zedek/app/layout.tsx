@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import type { ReactNode } from 'react';
 import { Providers } from '../components/providers';
+import { fontVariables } from './fonts';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     // suppressHydrationWarning is required by next-themes, which sets
     // data-theme on <html> before React hydrates.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <body>
         <Providers {...(nonce ? { nonce } : {})}>{children}</Providers>
       </body>

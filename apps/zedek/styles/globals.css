@@ -57,10 +57,22 @@
   --color-neutral-600: #1f2937;
   --color-neutral-700: #111827;
 
-  /* Scripture reading type — the primary reading surface (AGENTS.md §12). */
-  --font-scripture: Georgia, 'Times New Roman', serif;
+  /*
+   * Type — AGENTS.md §6 and §12.
+   *
+   * The loaded faces come from `app/fonts.ts` via next/font, which self-hosts
+   * them and computes a size-adjusted fallback so the swap does not move the
+   * page. The stacks after each variable are what renders before the font
+   * arrives, and what renders if it never does — never a blank page (§31).
+   *
+   * Source Serif 4 for Scripture and headings: drawn for long-form reading,
+   * open and warm where Georgia is tight. Inter for the interface: built for
+   * screens at the small sizes a page actually spends its type on.
+   */
+  --font-scripture: var(--font-scripture-loaded), Georgia, 'Times New Roman', serif;
   --font-ui:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    var(--font-ui-loaded), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
 }
 
 /**

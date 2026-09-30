@@ -37,7 +37,14 @@
   --color-neutral-600: #1f2937;
   --color-neutral-700: #111827;
 
-  --font-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /*
+   * Inter, loaded by app/fonts.ts via next/font. The stack after it is what
+   * renders before the font arrives and if it never does. No reading serif:
+   * the backoffice has no Scripture surface (§51).
+   */
+  --font-ui:
+    var(--font-ui-loaded), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', Menlo, monospace;
 }
 
