@@ -14,6 +14,9 @@ import { NO_DATABASE_MESSAGE, createTestSchema, hasTestDatabase } from '../testi
  */
 const describeWithDatabase = hasTestDatabase() ? describe : describe.skip;
 
+/** Migration 0004, which replaced the plain trigram index. */
+const TEXT_SEARCH_VERSION = 4;
+
 if (!hasTestDatabase()) {
   console.warn(`\n[text-search.test] ${NO_DATABASE_MESSAGE}\n`);
 }
@@ -289,8 +292,17 @@ describeWithDatabase('text search', () => {
 
     it('restores that index on rollback', async () => {
       // Rolling back must leave migration 0001's schema as 0001 built it.
+      // down() reverts only the newest migration, and 0004 stopped being the
+      // newest when 0005 landed — so step back until 0004 itself is reverted,
+      // rather than assuming it is last.
       const runner = new MigrationRunner(pool, MIGRATIONS);
-      await runner.down();
+      let reverted: number | undefined;
+
+      do {
+        reverted = (await runner.down())?.version;
+      } while (reverted !== undefined && reverted > TEXT_SEARCH_VERSION);
+
+      expect(reverted).toBe(TEXT_SEARCH_VERSION);
 
       const { rows } = await pool.query<{ indexname: string }>(
         `SELECT indexname FROM pg_indexes

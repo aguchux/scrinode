@@ -35,6 +35,10 @@ const PROVIDED_EXTERNALLY = new Set([
   // .env.example would imply they are configuration, which they are not.
   'COMPUTERNAME',
   'HOSTNAME',
+  // Set by Vercel on every build and function. The web app reads it only as
+  // a fallback for NEXT_PUBLIC_SITE_URL, which .env.example documents along
+  // with why this one is preferred over VERCEL_URL.
+  'VERCEL_PROJECT_PRODUCTION_URL',
 ]);
 
 function documentedVariables(): Set<string> {

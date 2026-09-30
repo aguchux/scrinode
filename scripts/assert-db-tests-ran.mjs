@@ -32,7 +32,7 @@ const SUITES = [
   ['@scrinode/api', 'src/database/migration.runner.test.ts'],
   ['@scrinode/api', 'src/database/migrations/migrations.test.ts'],
   ['@scrinode/api', 'src/database/migrations/text-search.test.ts'],
-  ['@scrinode/web', 'src/auth/adapter.test.ts'],
+  ['@scrinode/web', 'auth/adapter.test.ts'],
 ];
 
 if (!process.env.TEST_DATABASE_URL) {
