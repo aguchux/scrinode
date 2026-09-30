@@ -40,6 +40,12 @@ export function SiteHeader() {
         alignItems: 'center',
         gap: '1.25rem',
         padding: '0.85rem clamp(1rem, 4vw, 2.75rem)',
+        // The same cap and gutters as every section below, so the wordmark
+        // lines up with the hero's headline and the feature grid's first card
+        // rather than drifting to the viewport edge on a wide display.
+        maxWidth: '84rem',
+        margin: '0 auto',
+        width: '100%',
       }}
     >
       <a href="/" style={{ textDecoration: 'none', flexShrink: 0 }} aria-label="Scrinode home">
@@ -155,10 +161,14 @@ export function SiteHeader() {
           aria-label="Primary, mobile"
           className="scrinode-mobile-nav"
           style={{
+            // Offsets are relative to the header, which is now a centred,
+            // width-capped box rather than the full viewport — so these match
+            // its own gutters instead of the window's.
             position: 'absolute',
             top: '100%',
             left: 'clamp(1rem, 4vw, 2.75rem)',
             right: 'clamp(1rem, 4vw, 2.75rem)',
+            zIndex: 30,
             display: 'flex',
             flexDirection: 'column',
             gap: '0.2rem',

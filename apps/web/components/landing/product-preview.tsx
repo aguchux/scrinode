@@ -86,7 +86,7 @@ export function ProductPreview() {
     >
       <PreviewTopBar />
 
-      <div style={{ display: 'flex', minHeight: '22rem' }}>
+      <div style={{ display: 'flex', minHeight: '24rem' }}>
         <PreviewSidebar />
         <PreviewScripture />
         <PreviewZedek />
@@ -108,7 +108,13 @@ function PreviewTopBar() {
       }}
     >
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-        <img src="/mark.png" alt="" width={18} height={18} style={{ display: 'block' }} />
+        <img
+          src="/mark.png"
+          alt=""
+          width={16}
+          height={18}
+          style={{ display: 'block', objectFit: 'contain' }}
+        />
         <span
           style={{ fontFamily: 'var(--font-scripture)', fontSize: '0.92rem', color: '#172033' }}
         >
@@ -160,7 +166,7 @@ function PreviewSidebar() {
     <div
       className="scrinode-preview-sidebar"
       style={{
-        width: '8.5rem',
+        width: '9.5rem',
         flexShrink: 0,
         borderRight: '1px solid #e9e5dd',
         background: '#fbfaf7',
@@ -280,7 +286,7 @@ function PreviewZedek() {
     <div
       className="scrinode-preview-zedek"
       style={{
-        width: '15rem',
+        width: '16.5rem',
         flexShrink: 0,
         padding: '0.75rem 0.85rem',
         background: '#ffffff',
@@ -324,9 +330,12 @@ function PreviewZedek() {
         <img
           src="/mark.png"
           alt=""
-          width={18}
+          // 16x18, the mark's real 232:256 proportions. Square dimensions
+          // here stretched it — the bug visible as a smeared logo beside
+          // Zedek's reply.
+          width={16}
           height={18}
-          style={{ display: 'block', flexShrink: 0, marginTop: '0.1rem' }}
+          style={{ display: 'block', flexShrink: 0, marginTop: '0.1rem', objectFit: 'contain' }}
         />
         <p
           style={{

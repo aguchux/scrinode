@@ -52,14 +52,20 @@ export function Hero() {
           <h1
             style={{
               fontFamily: 'var(--font-scripture)',
-              fontSize: 'clamp(2.5rem, 5.4vw, 4.1rem)',
-              lineHeight: 1.06,
+              // Sized so "Scripture, Study, and" fits one line in the hero's
+              // left column. The previous ceiling overflowed it into three
+              // lines, which broke the two-line shape the design relies on.
+              fontSize: 'clamp(2.25rem, 4.4vw, 3.5rem)',
+              lineHeight: 1.08,
               letterSpacing: '-0.02em',
               margin: '0 0 1.25rem',
               color: '#f7f4ec',
+              // The explicit <br> sets the break; this stops the first line
+              // wrapping again on its own at an awkward width.
+              textWrap: 'balance',
             }}
           >
-            Scripture, Study, and
+            <span className="scrinode-headline-line">Scripture, Study, and</span>
             <br />
             <span style={{ color: '#c9a961' }}>AI — Unified.</span>
           </h1>

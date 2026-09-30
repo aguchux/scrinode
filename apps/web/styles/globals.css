@@ -221,11 +221,12 @@
       display: none !important;
     }
 
-    /* The hero's two columns. The preview is given the larger share because
-       it carries three panes of its own; below this width it sits under the
-       copy at full width rather than being squeezed (§5). */
+    /* The hero's two columns. The preview takes the larger share because it
+       carries three panes of its own and each needs room to stay legible;
+       below this width it sits under the copy at full width rather than being
+       squeezed (§5). */
     .scrinode-hero {
-      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
     }
 
     .scrinode-vision {
@@ -238,6 +239,16 @@
 
     .scrinode-capability-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* The headline's first line is held on one line only where there is room
+     for it. Below this a phone would overflow horizontally, which §5 treats
+     as a layout failure rather than a styling preference — so it wraps
+     naturally instead. */
+  @media (min-width: 30rem) {
+    .scrinode-headline-line {
+      white-space: nowrap;
     }
   }
 
