@@ -392,7 +392,15 @@
   /* Every landing grid is one column by default and gains columns as width
      allows. Written this way round so a phone needs no query at all. */
   .scrinode-feature-grid {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 0.9rem;
+    max-width: 84rem;
+    margin: 0 auto;
+    /* A <ul>: the cards are a list, and a list is what a screen reader should
+       be told it is ("6 items") rather than six loose regions (§32). */
+    list-style: none;
+    padding: 0;
   }
 
   .scrinode-capability-grid {
@@ -470,6 +478,158 @@
   @media (min-width: 30rem) {
     .scrinode-headline-line {
       white-space: nowrap;
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+   * The capability cards.
+   *
+   * Front: a large icon and a title, centred. Back: the description.
+   *
+   * The reveal is bound to hover, focus AND activation, because hover alone
+   * excludes every touch device — which §5 says is nearly all of Scrinode's
+   * readers. `:focus-within` covers the tap: the card is a button, and a tap
+   * focuses it.
+   *
+   * Both faces are in the DOM and in the accessible tree at all times. A
+   * description that appears only after a pointer event is one some readers
+   * never receive (§32).
+   * ---------------------------------------------------------------------- */
+  .scrinode-features {
+    background: var(--color-background);
+    /* Pulls the strip up over the hero's lower edge, as the design does. */
+    margin-top: -2.5rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+    padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 4vw, 2.75rem);
+    position: relative;
+    z-index: 5;
+  }
+
+  .scrinode-flip {
+    /* The fixed height is what lets both faces stack: they are absolutely
+       positioned, so the card cannot size to its content. Tall enough for the
+       longest description at the narrowest column. */
+    min-height: 11.5rem;
+    perspective: 1000px;
+  }
+
+  .scrinode-flip-button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+
+  .scrinode-flip-inner {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    transform-style: preserve-3d;
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .scrinode-flip-button:hover .scrinode-flip-inner,
+  .scrinode-flip-button:focus-visible .scrinode-flip-inner,
+  .scrinode-flip:focus-within .scrinode-flip-inner {
+    transform: rotateY(180deg);
+  }
+
+  .scrinode-flip-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    /* Without this the reverse face shows through the front as mirrored text. */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    text-align: center;
+  }
+
+  .scrinode-flip-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(140deg, #1b2537 0%, #22304a 100%);
+    border-color: rgba(197, 162, 83, 0.28);
+  }
+
+  .scrinode-flip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 999px;
+    background: #f4ead6;
+    color: #a8842f;
+    flex-shrink: 0;
+  }
+
+  .scrinode-flip-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.35;
+  }
+
+  .scrinode-flip-body {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgba(243, 240, 232, 0.86);
+  }
+
+  .scrinode-flip-button:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 3px;
+    border-radius: 0.75rem;
+  }
+
+  /*
+   * §32 requires reduced motion be honoured. A 3D rotation is exactly the
+   * vestibular trigger that setting exists for, so the faces cross-fade
+   * instead — the same information, no movement.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .scrinode-flip-inner {
+      transition: none;
+    }
+
+    .scrinode-flip-button:hover .scrinode-flip-inner,
+    .scrinode-flip-button:focus-visible .scrinode-flip-inner,
+    .scrinode-flip:focus-within .scrinode-flip-inner {
+      transform: none;
+    }
+
+    .scrinode-flip-face {
+      backface-visibility: visible;
+      -webkit-backface-visibility: visible;
+      transition: opacity 160ms linear;
+    }
+
+    .scrinode-flip-back {
+      transform: none;
+      opacity: 0;
+    }
+
+    .scrinode-flip-button:hover .scrinode-flip-back,
+    .scrinode-flip-button:focus-visible .scrinode-flip-back,
+    .scrinode-flip:focus-within .scrinode-flip-back {
+      opacity: 1;
     }
   }
 

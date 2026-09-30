@@ -13,12 +13,28 @@ import {
  * Six cards on a light surface, overlapping the hero's lower edge so the
  * sections read as one composition rather than stacked bands.
  *
+ * ## The cards flip, and the detail is never hover-only
+ *
+ * The front is a large icon and a title, centred. The description is on the
+ * back, revealed on hover — but **hover is not a thing on a phone**, and §5
+ * puts phones first, so the reveal is bound to three things at once:
+ *
+ *   - hover, for a mouse
+ *   - focus, for a keyboard
+ *   - tap, for touch — the card is a real `<button>`, so a tap toggles it
+ *
+ * Both faces are in the DOM at all times and a screen reader is given both,
+ * because a description that only exists after a pointer event is a
+ * description some readers never get (§32).
+ *
+ * The flip is a transform, and §32 requires reduced motion be honoured — under
+ * `prefers-reduced-motion` the faces cross-fade instead of rotating.
+ *
  * Every claim here is something the codebase does. "Natural language search
  * across the entire Bible" is the 424,765 embedded units and §19's hybrid
- * retrieval; "cross-references" and "contextual analysis" are §15's structured
- * data. Where a capability is thinner than the sentence suggests — original
- * languages have no lexical dataset yet (§14.1) — the wording says what it
- * explores rather than promising depth that is not there.
+ * retrieval. Where a capability is thinner than the sentence suggests —
+ * original languages have no lexical dataset yet (§14.1) — the wording says
+ * what it explores rather than promising depth that is not there.
  */
 
 const FEATURES = [
@@ -56,79 +72,36 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section
-      id="features"
-      aria-label="What Scrinode does"
-      style={{
-        background: 'var(--color-background)',
-        // Pulls the strip up over the hero's lower edge, as the design does.
-        marginTop: '-2.5rem',
-        borderRadius: '1.25rem 1.25rem 0 0',
-        padding: 'clamp(2rem, 4vw, 2.75rem) clamp(1rem, 4vw, 2.75rem)',
-        position: 'relative',
-        zIndex: 5,
-      }}
-    >
-      <div
-        className="scrinode-feature-grid"
-        style={{
-          display: 'grid',
-          gap: '0.9rem',
-          maxWidth: '84rem',
-          margin: '0 auto',
-        }}
-      >
+    <section id="features" aria-label="What Scrinode does" className="scrinode-features">
+      <ul className="scrinode-feature-grid">
         {FEATURES.map(({ Icon, title, body }) => (
-          <article
-            key={title}
-            style={{
-              background: 'var(--color-surface)',
-              border: '1px solid var(--color-border)',
-              borderRadius: '0.75rem',
-              padding: '1.1rem 1rem',
-            }}
-          >
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '2.4rem',
-                height: '2.4rem',
-                borderRadius: '999px',
-                background: '#f4ead6',
-                color: '#a8842f',
-                marginBottom: '0.8rem',
-              }}
-            >
-              <Icon width={19} height={19} />
-            </span>
+          <li key={title} className="scrinode-flip">
+            {/*
+              A button, not a div with a handler. It is focusable, it responds
+              to Enter and Space, and a screen reader announces it as something
+              that can be operated — none of which a div gives for free (§32).
 
-            <h3
-              style={{
-                margin: '0 0 0.4rem',
-                fontSize: '0.9375rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                letterSpacing: '-0.005em',
-              }}
-            >
-              {title}
-            </h3>
+              `aria-expanded` is deliberately absent: the description is always
+              in the accessible tree, so nothing is being expanded. Announcing a
+              state that changes nothing for a screen reader would be noise.
+            */}
+            <button type="button" className="scrinode-flip-button">
+              <span className="scrinode-flip-inner">
+                <span className="scrinode-flip-face scrinode-flip-front">
+                  <span className="scrinode-flip-icon" aria-hidden="true">
+                    <Icon width={30} height={30} />
+                  </span>
+                  <span className="scrinode-flip-title">{title}</span>
+                </span>
 
-            <p
-              style={{
-                margin: 0,
-                fontSize: '0.8125rem',
-                lineHeight: 1.55,
-                color: 'var(--color-text-secondary)',
-              }}
-            >
-              {body}
-            </p>
-          </article>
+                <span className="scrinode-flip-face scrinode-flip-back">
+                  <span className="scrinode-flip-body">{body}</span>
+                </span>
+              </span>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

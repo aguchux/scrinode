@@ -342,6 +342,18 @@ allows.
   into 360px is worse than one column: below its breakpoint the product preview
   drops the navigation rail entirely, because a picture of a nav rail teaches a
   reader nothing and costs a third of the width.
+- **Nothing may be reachable by hover alone.** Touch devices have no hover
+  state, and they are nearly all of Scrinode's traffic. A hover reveal binds to
+  hover, focus *and* activation — which in practice means the thing being
+  hovered is a `<button>`, so a tap and the Enter key both work. The landing
+  page's capability cards do this.
+- **Content revealed by interaction stays in the accessible tree.** A back face
+  hidden until a pointer arrives is content a screen-reader user never receives.
+  Both faces of a flip card are always in the DOM and neither is `aria-hidden`;
+  the effect is purely visual.
+- **Honour `prefers-reduced-motion` for anything that moves.** A 3D card
+  rotation is precisely the vestibular trigger that setting exists for. Under
+  it the cards cross-fade: same information, no movement.
 
 ---
 
