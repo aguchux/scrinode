@@ -1,9 +1,8 @@
+import { Closing } from '../components/landing/closing';
 import { Features } from '../components/landing/features';
 import { Hero } from '../components/landing/hero';
-import { SiteFooter } from '../components/landing/site-footer';
 import { VerseBand } from '../components/landing/verse-band';
 import { Vision } from '../components/landing/vision';
-import { WaitlistBand } from '../components/landing/waitlist-band';
 
 /**
  * The home page.
@@ -13,6 +12,10 @@ import { WaitlistBand } from '../components/landing/waitlist-band';
  * open yet, so the waitlist remains the call to action — but the capabilities
  * described are built, and the product preview in the hero renders the real
  * §4 navigation rather than a picture of one.
+ *
+ * `Closing` is the waitlist and the footer on one backdrop: they used to be
+ * two sections with a strip of page colour between them, which read as a seam
+ * rather than an ending.
  *
  * Composed entirely from @scrinode/ui primitives, so the reader can be built
  * from the same vocabulary rather than a second one.
@@ -24,8 +27,7 @@ export default function Home() {
       <Features />
       <VerseBand />
       <Vision />
-      <WaitlistBand />
-      <SiteFooter />
+      <Closing />
     </main>
   );
 }
