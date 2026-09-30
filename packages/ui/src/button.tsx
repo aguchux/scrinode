@@ -8,7 +8,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
  * sparingly — §6 is explicit that accents lose their meaning when everything
  * carries one.
  */
-export type ButtonVariant = 'gold' | 'ink' | 'ghost' | 'outline';
+export type ButtonVariant = 'gold' | 'ink' | 'ghost' | 'outline' | 'light';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -48,6 +48,15 @@ const VARIANTS: Record<ButtonVariant, React.CSSProperties> = {
     background: 'transparent',
     color: 'var(--color-text-primary)',
     border: '1px solid var(--color-border)',
+  },
+  // A solid light pill for a secondary action over photography. `ghost` is
+  // translucent, which over a bright area of an image leaves too little
+  // contrast for §32; this stays opaque wherever it lands.
+  light: {
+    background: '#f7f4ec',
+    color: '#172033',
+    border: '1px solid rgba(23,32,51,0.08)',
+    boxShadow: '0 1px 2px rgba(8,12,22,0.24)',
   },
 };
 

@@ -126,3 +126,148 @@ export function ArrowIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Magnifier — search, the product's primary verb (§14). */
+export function SearchIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="10.8" cy="10.8" r="6.5" />
+      <path d="m15.6 15.6 4.1 4.1" />
+    </Icon>
+  );
+}
+
+/** Two glyphs side by side — original languages, Greek and Hebrew. */
+export function LanguagesIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3.4 17.5 7.3 6.8l3.9 10.7" />
+      <path d="M4.7 14.2h5.2" />
+      <path d="M14.4 9.2h6.2" />
+      <path d="M17.5 9.2v8.3" />
+      <path d="M14.4 17.5h6.2" />
+    </Icon>
+  );
+}
+
+/** A node linked to three others — cross-references across Scripture (§39). */
+export function CrossReferenceIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="5.4" r="2.4" />
+      <circle cx="5.2" cy="17.6" r="2.4" />
+      <circle cx="18.8" cy="17.6" r="2.4" />
+      <path d="M10.8 7.5 6.4 15.5" />
+      <path d="m13.2 7.5 4.4 8" />
+      <path d="M7.6 17.6h8.8" />
+    </Icon>
+  );
+}
+
+/** An open book with a widening frame — context around the text (§15). */
+export function ContextIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 7.6C10.8 6.4 9.2 5.8 7 5.8H4.4v11H7c2.2 0 3.8.6 5 1.8" />
+      <path d="M12 7.6c1.2-1.2 2.8-1.8 5-1.8h2.6v11H17c-2.2 0-3.8.6-5 1.8" />
+      <path d="M12 7.6v11" />
+    </Icon>
+  );
+}
+
+/** A lamp — insight. Used for Zedek in the feature grid. */
+export function InsightIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M9.2 17.4a5.6 5.6 0 1 1 5.6 0v1.4a1.4 1.4 0 0 1-1.4 1.4h-2.8a1.4 1.4 0 0 1-1.4-1.4Z" />
+      <path d="M10.4 20.8h3.2" />
+    </Icon>
+  );
+}
+
+/** Two figures — shared ministry work and team collaboration (§3.4). */
+export function TeamIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="9" cy="8.4" r="3" />
+      <path d="M3.6 19.2a5.6 5.6 0 0 1 10.8 0" />
+      <path d="M16.2 6.2a3 3 0 0 1 0 5.8" />
+      <path d="M17.4 14.2a5.6 5.6 0 0 1 3 5" />
+    </Icon>
+  );
+}
+
+/** A document with lines — notes, sermons and saved work. */
+export function DocumentIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 3.4h7.4L19 9v11.6H6Z" />
+      <path d="M13.2 3.4V9H19" />
+      <path d="M9 13.4h6" />
+      <path d="M9 16.6h4" />
+    </Icon>
+  );
+}
+
+/** An upward share arrow — creating and exporting from research (§3.4). */
+export function CreateIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 4.2v10" />
+      <path d="m8.2 7.8 3.8-3.6 3.8 3.6" />
+      <path d="M5 14.4v3.4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.4" />
+    </Icon>
+  );
+}
+
+/** A sun over a horizon — the verse of the day. */
+export function SunriseIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3.6 18.4h16.8" />
+      <path d="M7.6 18.4a4.4 4.4 0 0 1 8.8 0" />
+      <path d="M12 5.2v2.6" />
+      <path d="m6.9 7.4 1.8 1.8" />
+      <path d="m17.1 7.4-1.8 1.8" />
+    </Icon>
+  );
+}
+
+/** A compass rose — the study workflow, finding a way through (§1). */
+export function CompassIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="8.4" />
+      <path d="m15.2 8.8-1.8 4.6-4.6 1.8 1.8-4.6Z" />
+    </Icon>
+  );
+}
+
+/** Sparkles — AI assistance, used sparingly beside Zedek (§6). */
+export function SparkIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m12 4 1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6Z" />
+      <path d="M18.4 15.2l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7Z" />
+    </Icon>
+  );
+}
+
+/** A chevron, for disclosure rows and menus. */
+export function ChevronIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m9 6 6 6-6 6" />
+    </Icon>
+  );
+}
+
+/** A filled play triangle in a ring — the overview video control. */
+export function PlayIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M10.2 8.6 16 12l-5.8 3.4Z" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}

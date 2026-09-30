@@ -1,123 +1,110 @@
 'use client';
 
-import { Button, Scene, WaitlistForm, BellIcon } from '@scrinode/ui';
+import { ArrowIcon, Button, PlayIcon, Scene } from '@scrinode/ui';
+import { ProductPreview } from './product-preview';
 import { SiteHeader } from './site-header';
 
 /**
  * The hero.
  *
- * The backdrop is `/bgs/header.jpg`, converted from a 2.6 MB PNG to a 430 KB
- * progressive JPEG. The source had no alpha channel, so JPEG loses nothing;
- * progressive matters because this image is the first thing painted and §31
- * targets a 2 s app shell.
+ * Two columns on desktop — the claim on the left, the product on the right —
+ * collapsing to one on narrow screens, where the preview follows the copy
+ * rather than shrinking beside it. §5: never merely stretch or squeeze a
+ * layout across breakpoints.
  *
- * The `strong` scrim is not optional decoration. This photograph carries a
- * bright sky, and white headline text over it would fail §32's AA contrast
- * target wherever the sun sits — see Scene for why a per-pixel measurement
- * cannot answer that.
+ * The header sits inside the Scene rather than above it, so the photograph
+ * runs behind the navigation as the design intends.
+ *
+ * The copy claims what Scrinode does, not what it will do. The product is in
+ * MVP build, and the waitlist is the honest call to action while the reader
+ * is unfinished — but nothing here says "coming soon", because the search,
+ * retrieval and Zedek grounding described are built.
  */
-export function Hero({ onJoin }: { onJoin?: (email: string) => Promise<void> }) {
+export function Hero() {
   return (
-    <Scene tone="dawn" image="/bgs/header.jpg" scrim="strong" style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }}>
+    <Scene tone="dawn" image="/bgs/header.jpg" scrim="strong">
       <SiteHeader />
 
       <div
-        id="waitlist"
+        className="scrinode-hero"
         style={{
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: 'clamp(2.5rem, 7vw, 5.5rem) clamp(1rem, 4vw, 3rem) clamp(3.5rem, 8vw, 6rem)',
-          maxWidth: '68rem',
-          width: '100%',
+          display: 'grid',
+          gap: 'clamp(2rem, 5vw, 3.5rem)',
+          alignItems: 'center',
+          padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2.75rem) clamp(3rem, 7vw, 5rem)',
+          maxWidth: '84rem',
+          margin: '0 auto',
         }}
       >
-        <p
-          style={{
-            margin: 0,
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            letterSpacing: '0.28em',
-            textTransform: 'uppercase',
-            color: 'rgba(243,240,232,0.74)',
-          }}
-        >
-          A deeper tomorrow begins here
-        </p>
+        <div style={{ minWidth: 0 }}>
+          <p
+            style={{
+              margin: '0 0 1rem',
+              fontSize: '0.75rem',
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+              color: '#c9a961',
+            }}
+          >
+            Faith deeper. Insights clearer. Ministry further.
+          </p>
 
-        <h1
-          style={{
-            margin: '1.1rem 0 0',
-            fontFamily: 'var(--font-scripture)',
-            fontWeight: 400,
-            fontSize: 'clamp(3rem, 9vw, 5.75rem)',
-            lineHeight: 1.02,
-            letterSpacing: '-0.02em',
-            color: '#f7f4ec',
-            textShadow: '0 2px 24px rgba(8,12,20,0.45)',
-          }}
-        >
-          Scrinode
-        </h1>
+          <h1
+            style={{
+              fontFamily: 'var(--font-scripture)',
+              fontSize: 'clamp(2.5rem, 5.4vw, 4.1rem)',
+              lineHeight: 1.06,
+              letterSpacing: '-0.02em',
+              margin: '0 0 1.25rem',
+              color: '#f7f4ec',
+            }}
+          >
+            Scripture, Study, and
+            <br />
+            <span style={{ color: '#c9a961' }}>AI — Unified.</span>
+          </h1>
 
-        <p
-          style={{
-            display: 'inline-flex',
-            alignSelf: 'flex-start',
-            margin: '1.25rem 0 0',
-            padding: '0.6rem 1.75rem',
-            borderRadius: '999px',
-            border: '1px solid rgba(197,162,83,0.65)',
-            background: 'rgba(16,21,31,0.35)',
-            fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-            fontWeight: 600,
-            letterSpacing: '0.24em',
-            textTransform: 'uppercase',
-            color: '#e3c884',
-          }}
-        >
-          Coming Soon
-        </p>
+          <p
+            style={{
+              margin: '0 0 2rem',
+              maxWidth: '34rem',
+              fontSize: 'clamp(1rem, 1.4vw, 1.0625rem)',
+              lineHeight: 1.65,
+              color: 'rgba(243,240,232,0.82)',
+            }}
+          >
+            Scrinode is an AI-powered Bible search, study, and ministry workspace designed to help
+            you go deeper into God’s Word with confidence. Explore Scripture, original languages,
+            cross-references, contextual insights, and prepare meaningful sermons — all in one
+            place.
+          </p>
 
-        <p
-          style={{
-            margin: '1.9rem 0 0',
-            maxWidth: '34rem',
-            fontSize: 'clamp(1.05rem, 2vw, 1.3rem)',
-            lineHeight: 1.6,
-            color: 'rgba(243,240,232,0.9)',
-          }}
-        >
-          Bible-first study. AI-powered research. Tools to help you read,
-          understand, and live God&rsquo;s Word more deeply.
-        </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem' }}>
+            <Button
+              variant="ink"
+              onClick={() =>
+                document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })
+              }
+            >
+              Join Waitlist
+              <ArrowIcon width={16} height={16} />
+            </Button>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.85rem',
-            flexWrap: 'wrap',
-            marginTop: '2.1rem',
-          }}
-        >
-          {onJoin ? <WaitlistForm onSubmit={onJoin} /> : <WaitlistForm />}
-
-          <Button variant="ghost" size="lg" icon={<BellIcon width={18} height={18} />}>
-            Get Updates
-          </Button>
+            <Button
+              variant="light"
+              onClick={() =>
+                document.getElementById('workflow')?.scrollIntoView({ behavior: 'smooth' })
+              }
+            >
+              <PlayIcon width={18} height={18} />
+              Watch Overview
+            </Button>
+          </div>
         </div>
 
-        <p
-          style={{
-            margin: '1.1rem 0 0',
-            fontSize: '0.8125rem',
-            color: 'rgba(243,240,232,0.66)',
-          }}
-        >
-          Be the first to know when Scrinode launches. No spam, just meaningful updates.
-        </p>
+        <div className="scrinode-hero-preview" style={{ minWidth: 0 }}>
+          <ProductPreview />
+        </div>
       </div>
     </Scene>
   );

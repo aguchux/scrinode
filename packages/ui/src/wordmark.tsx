@@ -1,0 +1,80 @@
+import type { CSSProperties } from 'react';
+
+/**
+ * The Scrinode wordmark — the dove-and-circle mark beside the name.
+ *
+ * The mark is a raster asset rather than inline SVG: it carries gradients and
+ * overlapping strokes that inline SVG would either flatten or bloat, and at
+ * 12 KB for a 256px PNG it is smaller than the equivalent path data. It was
+ * resized from a 2,093px original, which was 361 KB — thirty times the weight
+ * for detail no display can show at 40px.
+ *
+ * `LeafMark` in `icons.tsx` remains for places wanting a monochrome glyph that
+ * inherits `currentColor`. This is the brand mark; that is a decoration.
+ */
+
+export type WordmarkTone = 'light' | 'dark';
+
+export interface WordmarkProps {
+  /** Which surface it sits on. `light` means light text on a dark backdrop. */
+  readonly tone?: WordmarkTone;
+  /** Mark height in pixels. The name scales with it. */
+  readonly size?: number;
+  /** Hide the name, leaving the mark alone — for narrow layouts. */
+  readonly markOnly?: boolean;
+  readonly style?: CSSProperties;
+}
+
+const TONES: Record<WordmarkTone, { name: string }> = {
+  light: { name: '#f7f4ec' },
+  dark: { name: '#172033' },
+};
+
+export function Wordmark({
+  tone = 'light',
+  size = 40,
+  markOnly = false,
+  style,
+}: WordmarkProps) {
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: size * 0.28,
+        lineHeight: 1,
+        ...style,
+      }}
+    >
+      {/*
+        A plain <img>, not next/image: this package is shared with the
+        backoffice and Zedek, and importing a framework component here would
+        tie @scrinode/ui to Next.js (§8). Width and height are set so the
+        header does not shift as it loads.
+      */}
+      <img
+        src="/mark.png"
+        alt=""
+        width={size}
+        height={size}
+        // Decorative: the name beside it already says "Scrinode", and a screen
+        // reader announcing both reads the brand twice (§32).
+        aria-hidden="true"
+        style={{ display: 'block', width: size, height: size, objectFit: 'contain' }}
+      />
+
+      {!markOnly && (
+        <span
+          style={{
+            fontFamily: 'var(--font-scripture)',
+            fontSize: size * 0.72,
+            letterSpacing: '-0.015em',
+            color: TONES[tone].name,
+          }}
+        >
+          Scrinode
+        </span>
+      )}
+    </span>
+  );
+}

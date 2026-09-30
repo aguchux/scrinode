@@ -137,20 +137,117 @@
  * ------------------------------------------------------------------------ */
 @layer components {
   /* The header's nav and tagline are the two things that genuinely cannot fit
-     on a phone. Hidden below the tablet breakpoint rather than wrapped: a
-     wrapped nav pushes the hero off the first screen. */
+     on a phone. Hidden below the desktop breakpoint rather than wrapped: a
+     wrapped nav pushes the hero off the first screen. The links move into the
+     menu toggle instead, so nothing is lost (§5). */
   .scrinode-nav,
-  .scrinode-tagline {
+  .scrinode-tagline,
+  .scrinode-header-search,
+  .scrinode-signin {
     display: none;
   }
 
-  @media (min-width: 60rem) {
-    .scrinode-nav {
+  .scrinode-menu-toggle {
+    display: inline-flex !important;
+  }
+
+  /* Every landing grid is one column by default and gains columns as width
+     allows. Written this way round so a phone needs no query at all. */
+  .scrinode-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scrinode-capability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scrinode-steps {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .scrinode-footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 30rem) {
+    .scrinode-feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scrinode-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .scrinode-capability-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scrinode-steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .scrinode-feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .scrinode-band-pair {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .scrinode-footer-grid {
+      grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .scrinode-nav,
+    .scrinode-header-search {
       display: flex;
+    }
+
+    .scrinode-signin {
+      display: inline;
     }
 
     .scrinode-tagline {
       display: block;
+    }
+
+    .scrinode-menu-toggle {
+      display: none !important;
+    }
+
+    /* The hero's two columns. The preview is given the larger share because
+       it carries three panes of its own; below this width it sits under the
+       copy at full width rather than being squeezed (§5). */
+    .scrinode-hero {
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    }
+
+    .scrinode-vision {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+    }
+
+    .scrinode-feature-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .scrinode-capability-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* The product preview is a wide three-pane layout. Below this it would
+     compress each pane past legibility, so the two side panels drop and the
+     Scripture column stands alone — still a true depiction, just narrower. */
+  @media (max-width: 52rem) {
+    .scrinode-preview-sidebar,
+    .scrinode-preview-zedek {
+      display: none;
     }
   }
 }

@@ -10,14 +10,28 @@ export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from '.
 export { SectionHeading, type SectionHeadingProps } from './section-heading';
 export { FeatureCard, type FeatureCardProps } from './feature-card';
 export { WaitlistForm, type WaitlistFormProps } from './waitlist-form';
+export { Wordmark, type WordmarkProps, type WordmarkTone } from './wordmark';
 export {
   ArrowIcon,
   BellIcon,
   BookIcon,
+  ChevronIcon,
+  CompassIcon,
+  ContextIcon,
+  CreateIcon,
+  CrossReferenceIcon,
+  DocumentIcon,
+  InsightIcon,
+  LanguagesIcon,
   LeafMark,
   LibraryIcon,
   MailIcon,
+  PlayIcon,
+  SearchIcon,
+  SparkIcon,
   StudyIcon,
+  SunriseIcon,
+  TeamIcon,
   WorkIcon,
   ZedekIcon,
 } from './icons';

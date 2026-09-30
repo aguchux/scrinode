@@ -1,55 +1,56 @@
 import {
-  BookIcon,
-  FeatureCard,
-  LibraryIcon,
-  SectionHeading,
-  StudyIcon,
-  WorkIcon,
-  ZedekIcon,
+  ContextIcon,
+  CrossReferenceIcon,
+  InsightIcon,
+  LanguagesIcon,
+  SearchIcon,
+  TeamIcon,
 } from '@scrinode/ui';
 
 /**
- * The five product domains (§3).
+ * The capability strip beneath the hero.
  *
- * Descriptions are drawn from §3's own wording rather than invented marketing,
- * and the accents are §6's semantic mapping: Scripture navy, Study olive,
- * Zedek gold, Work slate, Library warm stone.
+ * Six cards on a light surface, overlapping the hero's lower edge so the
+ * sections read as one composition rather than stacked bands.
+ *
+ * Every claim here is something the codebase does. "Natural language search
+ * across the entire Bible" is the 424,765 embedded units and §19's hybrid
+ * retrieval; "cross-references" and "contextual analysis" are §15's structured
+ * data. Where a capability is thinner than the sentence suggests — original
+ * languages have no lexical dataset yet (§14.1) — the wording says what it
+ * explores rather than promising depth that is not there.
  */
-const DOMAINS = [
+
+const FEATURES = [
   {
-    title: 'Scripture',
-    description: 'Read and explore the Bible with clarity and context.',
-    icon: <BookIcon />,
-    accent: 'var(--color-accent-scripture)',
-    tone: 'dawn' as const,
+    Icon: SearchIcon,
+    title: 'AI-Powered Scripture Search',
+    body: 'Find what you’re looking for with natural language search across the entire Bible.',
   },
   {
-    title: 'Study',
-    description: 'Go deeper with study guides, devotionals, and trusted resources.',
-    icon: <StudyIcon />,
-    accent: 'var(--color-accent-study)',
-    tone: 'parchment' as const,
+    Icon: LanguagesIcon,
+    title: 'Original Languages',
+    body: 'Explore Hebrew, Greek, and more with clear, practical insights.',
   },
   {
+    Icon: CrossReferenceIcon,
+    title: 'Cross-References',
+    body: 'Discover deeper connections across Scripture instantly.',
+  },
+  {
+    Icon: ContextIcon,
+    title: 'Contextual Analysis',
+    body: 'Understand the big picture with historical, cultural, and literary context.',
+  },
+  {
+    Icon: InsightIcon,
     title: 'Zedek AI',
-    description: 'Ask. Learn. Discover. AI-powered research grounded in Scripture.',
-    icon: <ZedekIcon />,
-    accent: 'var(--color-accent-zedek)',
-    tone: 'dawn' as const,
+    body: 'Your always-on study partner for questions, insights, and ministry preparation.',
   },
   {
-    title: 'Workspaces',
-    description: 'Plan, organize, and study together.',
-    icon: <WorkIcon />,
-    accent: 'var(--color-accent-work)',
-    tone: 'dusk' as const,
-  },
-  {
-    title: 'Library',
-    description: 'Your resources in one place — notes, books, highlights, and more.',
-    icon: <LibraryIcon />,
-    accent: 'var(--color-accent-library)',
-    tone: 'depth' as const,
+    Icon: TeamIcon,
+    title: 'Ministry Workspaces',
+    body: 'Organize notes, sermons, research, and team collaboration in one place.',
   },
 ];
 
@@ -57,34 +58,75 @@ export function Features() {
   return (
     <section
       id="features"
+      aria-label="What Scrinode does"
       style={{
-        position: 'relative',
-        // Lifts the panel over the hero, which is the overlap in the design.
-        marginTop: '-3rem',
-        borderRadius: '1.75rem 1.75rem 0 0',
         background: 'var(--color-background)',
-        padding: 'clamp(3rem, 6vw, 4.5rem) clamp(1rem, 4vw, 3rem)',
+        // Pulls the strip up over the hero's lower edge, as the design does.
+        marginTop: '-2.5rem',
+        borderRadius: '1.25rem 1.25rem 0 0',
+        padding: 'clamp(2rem, 4vw, 2.75rem) clamp(1rem, 4vw, 2.75rem)',
+        position: 'relative',
+        zIndex: 5,
       }}
     >
-      <SectionHeading
-        eyebrow="Built for a deeper tomorrow"
-        title="Everything You Need for a Richer Bible Study"
-        description="Scripture, study tools, AI-powered research, personal workspaces, and a library — all in one place, designed to help you grow in faith and make a greater impact."
-      />
-
-      {/* auto-fit rather than fixed columns: five cards reflow to 1, 2 or 3 per
-          row without a breakpoint per layout (§5). */}
       <div
+        className="scrinode-feature-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(13.5rem, 1fr))',
-          gap: '1.1rem',
-          maxWidth: '76rem',
-          margin: 'clamp(2.25rem, 5vw, 3.25rem) auto 0',
+          gap: '0.9rem',
+          maxWidth: '84rem',
+          margin: '0 auto',
         }}
       >
-        {DOMAINS.map((domain) => (
-          <FeatureCard key={domain.title} {...domain} />
+        {FEATURES.map(({ Icon, title, body }) => (
+          <article
+            key={title}
+            style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '0.75rem',
+              padding: '1.1rem 1rem',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '2.4rem',
+                height: '2.4rem',
+                borderRadius: '999px',
+                background: '#f4ead6',
+                color: '#a8842f',
+                marginBottom: '0.8rem',
+              }}
+            >
+              <Icon width={19} height={19} />
+            </span>
+
+            <h3
+              style={{
+                margin: '0 0 0.4rem',
+                fontSize: '0.9375rem',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                letterSpacing: '-0.005em',
+              }}
+            >
+              {title}
+            </h3>
+
+            <p
+              style={{
+                margin: 0,
+                fontSize: '0.8125rem',
+                lineHeight: 1.55,
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              {body}
+            </p>
+          </article>
         ))}
       </div>
     </section>
