@@ -315,6 +315,34 @@ Bible Navigation | Scripture Text | Study / Zedek / Notes
 
 Never merely stretch mobile cards across a desktop screen.
 
+## Mobile-first is a rule about CSS, not an aspiration
+
+Nearly all Scrinode's readers are on phones and tablets. "Mobile-first"
+therefore means the phone layout is what the stylesheet says with **no media
+query at all**, and every query is a `min-width` that adds capability as space
+allows.
+
+- **No `max-width` media queries.** A `max-width` rule is a desktop layout
+  apologising to a phone, and it inverts the cascade: the phone pays for
+  desktop CSS it then overrides. The landing page has none, and a new one
+  should be treated as a design that was built the wrong way round.
+- **Never put `display` in a `style` attribute on an element a media query
+  governs.** An inline style beats any stylesheet rule, so `display: none` in a
+  class silently does nothing. This was a real bug: the product preview's three
+  panes carried inline `display: flex`, so a phone rendered all three squeezed
+  to one word per line with a horizontal scrollbar, while the CSS that should
+  have collapsed them looked correct in review.
+- **`html, body { overflow-x: hidden }` is a backstop, not a fix.** Anything
+  that overflows is a bug to correct at its source; the guard exists so one
+  mistake does not take the whole page down on the devices that matter most.
+- **Touch targets are 44px.** §32 requires it, and 2.1rem icon buttons do not
+  meet it — a control that only appears on a wide screen is still touched on a
+  tablet.
+- **A layout that merely shrinks is not responsive.** Three columns squeezed
+  into 360px is worse than one column: below its breakpoint the product preview
+  drops the navigation rail entirely, because a picture of a nav rail teaches a
+  reader nothing and costs a third of the width.
+
 ---
 
 # 6. Visual Design Direction

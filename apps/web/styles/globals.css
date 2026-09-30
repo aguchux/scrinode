@@ -100,10 +100,45 @@
     color-scheme: dark;
   }
 
+  html,
   body {
     background-color: var(--color-background);
     color: var(--color-text-primary);
     font-family: var(--font-ui);
+
+    /*
+     * No horizontal scroll, ever.
+     *
+     * A page that scrolls sideways on a phone is broken, not merely untidy:
+     * the reader loses the right edge of every line and there is no affordance
+     * telling them why. This is a backstop, not a fix — anything that overflows
+     * is a bug to correct at its source — but it stops one mistake taking the
+     * whole page down on the devices §5 says come first.
+     */
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /*
+   * Nothing may be wider than its container by default.
+   *
+   * Images and embedded media have intrinsic widths that ignore the layout,
+   * which is the commonest single cause of a sideways-scrolling phone.
+   */
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
+  }
+
+  /*
+   * An image with explicit width and height keeps them — that pairing is what
+   * reserves layout space and prevents the shift as it loads. Only images
+   * sized by CSS alone scale their height.
+   */
+  img:not([width]):not([height]) {
+    height: auto;
   }
 
   ::selection {
@@ -252,13 +287,85 @@
     }
   }
 
-  /* The product preview is a wide three-pane layout. Below this it would
-     compress each pane past legibility, so the two side panels drop and the
-     Scripture column stands alone — still a true depiction, just narrower. */
-  @media (max-width: 52rem) {
-    .scrinode-preview-sidebar,
+  /* The hero's call to action. Stacked and full width on a phone so each
+     button carries its label and a 44px target; side by side once there is
+     room for both (§5, §32). */
+  .scrinode-hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .scrinode-hero-actions > * {
+    width: 100%;
+  }
+
+  @media (min-width: 26rem) {
+    .scrinode-hero-actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+    }
+
+    .scrinode-hero-actions > * {
+      width: auto;
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+   * The product preview.
+   *
+   * Mobile first: on a phone the panes stack and the navigation sidebar is
+   * dropped entirely, because a picture of a nav rail teaches a reader nothing
+   * and costs a third of the width. What remains is the product's actual
+   * story — a passage, and Zedek answering about it.
+   *
+   * The layout is here rather than inline because an inline `display` beats a
+   * media query. That was the bug: the panes carried `display: flex` in their
+   * style attribute, so `display: none` in this layer never applied and a
+   * phone rendered three columns squeezed to one word per line.
+   * ---------------------------------------------------------------------- */
+  .scrinode-preview-panes {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* A nav rail is the least informative third of the preview, and the first
+     thing to go when width is scarce. */
+  .scrinode-preview-sidebar {
+    display: none;
+  }
+
+  .scrinode-preview-scripture {
+    /* Stacked, the divider reads as a rule between sections, not a column
+       edge. */
+    border-bottom: 1px solid #e9e5dd;
+  }
+
+  .scrinode-preview-zedek {
+    display: flex;
+  }
+
+  @media (min-width: 52rem) {
+    .scrinode-preview-panes {
+      flex-direction: row;
+      min-height: 24rem;
+    }
+
+    .scrinode-preview-sidebar {
+      display: flex;
+      width: 9.5rem;
+      flex-shrink: 0;
+    }
+
+    .scrinode-preview-scripture {
+      border-bottom: none;
+      border-right: 1px solid #e9e5dd;
+    }
+
     .scrinode-preview-zedek {
-      display: none;
+      width: 16.5rem;
+      flex-shrink: 0;
     }
   }
 }

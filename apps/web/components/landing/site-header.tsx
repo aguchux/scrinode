@@ -84,8 +84,11 @@ export function SiteHeader() {
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '2.1rem',
-            height: '2.1rem',
+            // 2.75rem = 44px, §32's minimum touch target. Only shown on
+            // wide screens, but sized for touch regardless: tablets and
+            // touch laptops reach this breakpoint.
+            width: '2.75rem',
+            height: '2.75rem',
             borderRadius: '999px',
             border: '1px solid rgba(247,244,236,0.18)',
             background: 'transparent',
@@ -127,8 +130,10 @@ export function SiteHeader() {
           onClick={() => setMenuOpen((open) => !open)}
           style={{
             display: 'none',
-            width: '2.1rem',
-            height: '2.1rem',
+            // The primary navigation control on a phone; §32's 44px minimum
+            // is not negotiable for it.
+            width: '2.75rem',
+            height: '2.75rem',
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '0.4rem',
@@ -203,7 +208,15 @@ function NavLink({
     fontSize: '0.875rem',
     textDecoration: 'none',
     whiteSpace: 'nowrap' as const,
-    ...(block ? { padding: '0.55rem 0.6rem', borderRadius: '0.4rem' } : {}),
+    ...(block
+      ? {
+          // A menu row is a touch target: 0.75rem of padding either side of a
+          // 0.875rem line clears 44px (§32).
+          display: 'block',
+          padding: '0.75rem 0.7rem',
+          borderRadius: '0.4rem',
+        }
+      : {}),
   };
 
   if (!ready) {

@@ -86,7 +86,13 @@ export function ProductPreview() {
     >
       <PreviewTopBar />
 
-      <div style={{ display: 'flex', minHeight: '24rem' }}>
+      {/*
+        Stacked on a phone, three panes side by side above 52rem. The layout
+        lives in CSS rather than inline style because an inline `display`
+        cannot be overridden by a media query — which is exactly the bug that
+        put three squeezed columns on a phone and one word per line.
+      */}
+      <div className="scrinode-preview-panes">
         <PreviewSidebar />
         <PreviewScripture />
         <PreviewZedek />
@@ -125,6 +131,7 @@ function PreviewTopBar() {
       <span
         style={{
           flex: 1,
+          minWidth: 0,
           display: 'flex',
           alignItems: 'center',
           gap: '0.45rem',
@@ -136,9 +143,29 @@ function PreviewTopBar() {
           fontSize: '0.68rem',
         }}
       >
-        <SearchIcon width={13} height={13} />
-        Search Scripture, topics, people, or ask Zedek AI…
-        <span style={{ marginLeft: 'auto', fontSize: '0.6rem', letterSpacing: '0.04em' }}>⌘K</span>
+        <SearchIcon width={13} height={13} style={{ flexShrink: 0 }} />
+        {/*
+          Truncated rather than wrapped. A two-line search field is not a thing
+          the product has, so wrapping it would make the preview untrue as well
+          as ragged.
+        */}
+        <span
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0,
+          }}
+        >
+          Search Scripture, topics, people, or ask Zedek AI…
+        </span>
+        {/* A keyboard hint means nothing on a touch device. */}
+        <span
+          className="scrinode-preview-kbd"
+          style={{ marginLeft: 'auto', fontSize: '0.6rem', letterSpacing: '0.04em', flexShrink: 0 }}
+        >
+          ⌘K
+        </span>
       </span>
 
       <span
@@ -166,12 +193,9 @@ function PreviewSidebar() {
     <div
       className="scrinode-preview-sidebar"
       style={{
-        width: '9.5rem',
-        flexShrink: 0,
         borderRight: '1px solid #e9e5dd',
         background: '#fbfaf7',
         padding: '0.7rem 0.5rem',
-        display: 'flex',
         flexDirection: 'column',
         gap: '0.1rem',
       }}
@@ -217,12 +241,12 @@ function PreviewSidebar() {
 function PreviewScripture() {
   return (
     <div
+      className="scrinode-preview-scripture"
       style={{
         flex: 1,
         minWidth: 0,
         padding: '0.75rem 1rem',
         background: '#fcfaf5',
-        borderRight: '1px solid #e9e5dd',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.7rem' }}>
@@ -286,11 +310,8 @@ function PreviewZedek() {
     <div
       className="scrinode-preview-zedek"
       style={{
-        width: '16.5rem',
-        flexShrink: 0,
         padding: '0.75rem 0.85rem',
         background: '#ffffff',
-        display: 'flex',
         flexDirection: 'column',
         gap: '0.6rem',
       }}

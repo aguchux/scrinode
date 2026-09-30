@@ -85,7 +85,12 @@ export function Hero() {
             place.
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.9rem' }}>
+          {/*
+            Full-width and stacked on a phone, side by side once there is room.
+            Two half-width buttons on a 360px screen leave neither with a
+            comfortable label or a 44px target (§32).
+          */}
+          <div className="scrinode-hero-actions">
             <Button
               variant="ink"
               onClick={() =>
