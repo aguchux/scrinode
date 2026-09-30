@@ -6,10 +6,33 @@ import { fontVariables } from './fonts';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Zedek — Scrinode',
+  title: {
+    default: 'Zedek — Scrinode',
+    template: '%s · Zedek',
+  },
   description: 'Scripture-grounded AI research. Studies, conversations and citations.',
-  // Zedek holds a reader's private research. It is not public content.
-  robots: { index: false, follow: false },
+  applicationName: 'Zedek',
+
+  /*
+   * Never indexed, and no Open Graph.
+   *
+   * Zedek holds a reader's private research (§3.3). `noindex` keeps it out of
+   * search results; the absence of og: tags is the other half — a link pasted
+   * into a chat should not render a preview card describing someone's study.
+   */
+  robots: { index: false, follow: false, nocache: true },
+
+  icons: {
+    icon: [
+      { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+
+  appleWebApp: { capable: true, title: 'Zedek', statusBarStyle: 'black-translucent' },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
