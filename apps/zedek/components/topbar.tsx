@@ -3,16 +3,28 @@
 import {
   AlphaIcon,
   BookIcon,
-  ChevronIcon,
   CrossReferenceIcon,
   DocumentIcon,
   MenuIcon,
   MoreIcon,
 } from '@scrinode/ui';
+import type { Study } from '@scrinode/types';
 import type { ReactNode, Ref } from 'react';
+import { StudyMenu } from './study-menu';
 
 /**
- * The workspace top bar: which Study is open, and what can be asked of it.
+ * The workspace top bar.
+ *
+ * ## Layout
+ *
+ * The conversation's title is on the left, where a reader looks first and
+ * where the thread's own identity belongs. The Study switcher is a compact
+ * menu on the right.
+ *
+ * It was the other way round, and the Study pill carried `flex: 1` — so it
+ * stretched the full width of the bar, its two lines overlapped, and the title
+ * had nowhere to sit. Width goes to the thing that changes with every thread,
+ * not to the thing a reader switches occasionally.
  *
  * ## The quick actions are prompts, not features
  *
@@ -35,7 +47,7 @@ export interface QuickAction {
 }
 
 /**
- * The actions from the mockup.
+ * The actions from the design.
  *
  * Every one maps to something §3.2 or §15 already names — passage context,
  * cross references, original language — rather than inventing a capability.
@@ -69,9 +81,13 @@ export const QUICK_ACTIONS: readonly QuickAction[] = [
 ];
 
 export interface TopBarProps {
-  readonly studyTitle: string;
+  /** The open conversation's title. Absent before one is chosen. */
+  readonly conversationTitle?: string;
+  readonly activeStudy?: Pick<Study, 'id' | 'title'>;
+  readonly studies: readonly Pick<Study, 'id' | 'title'>[];
+  readonly onSelectStudy: (studyId: string) => void;
+  readonly onCreateStudy: () => void;
   readonly onOpenRail: () => void;
-  readonly onChooseStudy?: () => void;
   readonly onQuickAction: (action: QuickAction) => void;
   /** Disabled while a turn streams — a second question would abandon the first. */
   readonly busy?: boolean;
@@ -81,9 +97,12 @@ export interface TopBarProps {
 }
 
 export function TopBar({
-  studyTitle,
+  conversationTitle,
+  activeStudy,
+  studies,
+  onSelectStudy,
+  onCreateStudy,
   onOpenRail,
-  onChooseStudy,
   onQuickAction,
   busy = false,
   railToggleRef,
@@ -105,21 +124,28 @@ export function TopBar({
           <MenuIcon width={19} height={19} />
         </button>
 
-        <button type="button" className="zdk-study" onClick={onChooseStudy}>
-          <span className="zdk-study-icon" aria-hidden="true">
-            <BookIcon width={18} height={18} />
-          </span>
-          <span className="zdk-study-text">
-            <span className="zdk-study-name">{studyTitle}</span>
-            <span className="zdk-study-kind">Workspace</span>
-          </span>
-          <span aria-hidden="true" style={{ marginInlineStart: 'auto', display: 'inline-flex' }}>
-            {/* Rotated to point down: a disclosure, not a navigation. */}
-            <ChevronIcon width={15} height={15} style={{ transform: 'rotate(90deg)' }} />
-          </span>
-        </button>
+        {/* The thread's identity. An h1 rather than a styled span: it is the
+            page's heading, and a screen-reader user navigating by heading
+            should land on what they are reading (§32). */}
+        <h1 className="zdk-topbar-title">
+          <span className="zdk-topbar-name">{conversationTitle ?? 'New conversation'}</span>
+          {activeStudy ? <span className="zdk-topbar-study">{activeStudy.title}</span> : null}
+        </h1>
 
-        <button type="button" className="zdk-rail-toggle" aria-label="More options">
+        <StudyMenu
+          {...(activeStudy ? { activeStudy } : {})}
+          studies={studies}
+          onSelect={onSelectStudy}
+          onCreate={onCreateStudy}
+        />
+
+        {/* `zdk-topbar-more` carries only the ordering: from 64rem the Study
+            switcher moves past this to the far right of the bar. */}
+        <button
+          type="button"
+          className="zdk-rail-toggle zdk-topbar-more"
+          aria-label="More options"
+        >
           <MoreIcon width={18} height={18} />
         </button>
       </div>

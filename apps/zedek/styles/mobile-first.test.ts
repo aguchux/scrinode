@@ -15,7 +15,18 @@ import { describe, expect, it } from 'vitest';
  * here is a regression for almost everyone.
  */
 
-const workspace = readFileSync(join(__dirname, 'workspace.css'), 'utf8');
+const source = readFileSync(join(__dirname, 'workspace.css'), 'utf8');
+
+/**
+ * The stylesheet with its comments removed.
+ *
+ * Every assertion here runs against this rather than the raw file. The
+ * comments in `workspace.css` explain the bugs these rules prevent, so they
+ * name the very things being asserted absent — a check for `position: sticky`
+ * matched the paragraph explaining why sticky was removed, and passed a broken
+ * rule while failing a correct one.
+ */
+const workspace = source.replace(/\/\*[\s\S]*?\*\//g, '');
 
 describe('the workspace stylesheet', () => {
   it('contains no max-width media query', () => {
@@ -55,6 +66,43 @@ describe('the workspace stylesheet', () => {
         /font-size:\s*1rem/,
       );
     }
+  });
+
+  it('pins the composer to the bottom of the viewport', () => {
+    /*
+     * The reported bug: on a short thread the composer floated mid-screen with
+     * dead space beneath it.
+     *
+     * The cause was a broken height chain. The shell had `min-height`, which
+     * lets it grow but never makes its children fill it, and `.zdk-frame` had
+     * no base rule at all — so it collapsed to its content. The composer was
+     * `position: sticky`, which only pins to the bottom of a scrolling box, and
+     * nothing was scrolling.
+     *
+     * The fix is the chain, so each link is asserted: the shell is exactly the
+     * viewport, the frame stretches, and the composer does not shrink.
+     */
+    // Anchored on the line start, or `min-height: 100dvh` — the original bug —
+    // matches the tail of this pattern and passes.
+    expect(ruleBlock(workspace, '.zdk-shell')).toMatch(/^\s*height:\s*100dvh/m);
+    expect(ruleBlock(workspace, '.zdk-shell')).not.toMatch(/min-height:\s*100dvh/);
+
+    const frame = ruleBlock(workspace, '.zdk-frame');
+    expect(frame, '.zdk-frame must have a base rule or it collapses').toBeTruthy();
+    expect(frame).toMatch(/flex:\s*1/);
+    expect(frame).toMatch(/min-height:\s*0/);
+
+    const composer = ruleBlock(workspace, '.zdk-composer');
+    expect(composer).toMatch(/flex-shrink:\s*0/);
+    // Sticky would reintroduce the bug: it needs a scrolling ancestor, and the
+    // shell deliberately does not scroll.
+    expect(composer).not.toMatch(/position:\s*sticky/);
+  });
+
+  it('scrolls the thread rather than the page', () => {
+    // Otherwise an iOS rubber-band drags the whole shell, composer included.
+    expect(ruleBlock(workspace, '.zdk-shell')).toMatch(/overflow:\s*hidden/);
+    expect(ruleBlock(workspace, '.zdk-thread')).toMatch(/overflow-y:\s*auto/);
   });
 
   it('uses dynamic viewport units for the shell height', () => {

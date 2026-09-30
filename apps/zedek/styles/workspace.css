@@ -51,14 +51,42 @@
     display: flex;
     flex-direction: column;
 
-    /* Dynamic viewport height, not `100vh`. On mobile Safari `vh` includes the
-       collapsing URL bar, so a fixed composer sits below the fold until the
-       reader scrolls — the single most common mobile chat bug. */
-    min-height: 100dvh;
+    /*
+     * Exactly the viewport, not `min-height`.
+     *
+     * `min-height` lets the shell grow but never makes its children fill it,
+     * so on a short page the composer sat wherever the content ended —
+     * mid-screen, with dead space beneath. `height` plus `min-height: 0` on
+     * everything below is what pins it to the bottom and leaves the thread as
+     * the only thing that scrolls.
+     *
+     * `100dvh`, never `100vh`: on mobile Safari `vh` includes the collapsing
+     * URL bar, which puts a bottom-anchored composer below the fold until the
+     * reader scrolls.
+     */
+    height: 100dvh;
 
     color: var(--zdk-text);
     font-family: var(--font-ui);
     background-color: var(--zdk-ink);
+
+    /* The page itself never scrolls; the thread inside it does. Without this
+       an iOS rubber-band drags the whole shell and the composer with it. */
+    overflow: hidden;
+  }
+
+  /*
+   * The frame.
+   *
+   * On a phone it is a transparent pass-through that must not break the height
+   * chain: a plain block here collapses to its content, which is exactly what
+   * left the composer floating. From 64rem it becomes the inset panel.
+   */
+  .zdk-frame {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
   }
 
   /* The photographic backdrop.
@@ -389,22 +417,74 @@
     cursor: pointer;
   }
 
-  /* The Study switcher — the gold pill in the mockup. */
+  /* The conversation title, on the left where a reader looks first.
+     Flexible, so it takes whatever the Study menu does not. */
+  .zdk-topbar-title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+  }
+
+  .zdk-topbar-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--zdk-text);
+  }
+
+  /* The Study a conversation belongs to. Hidden on a phone, where the bar has
+     no room for a second line — the Study menu on the right already names it. */
+  .zdk-topbar-study {
+    display: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--zdk-text-dim);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Study menu
+   *
+   * A compact control on the right, sized to its content rather than
+   * stretched across the bar: it is a switcher used occasionally, and the
+   * width belongs to the conversation title beside it.
+   * -------------------------------------------------------------------- */
+
+  .zdk-studymenu {
+    position: relative;
+    flex-shrink: 0;
+  }
+
   .zdk-study {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    flex: 1;
-    min-width: 0;
+    gap: 0.5rem;
+    /* No `flex: 1`. That is what stretched this across the whole bar and left
+       the title with nowhere to go. */
+    max-width: 13rem;
     min-height: 2.75rem;
-    padding: 0.35rem 0.85rem;
+    padding: 0 0.85rem;
     border: 1px solid var(--zdk-line);
     border-radius: 999px;
     background: rgba(217, 184, 118, 0.07);
     color: inherit;
     font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
     text-align: start;
     cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease;
+  }
+
+  .zdk-study:hover {
+    background: rgba(217, 184, 118, 0.14);
+    border-color: var(--zdk-gold-dim);
   }
 
   .zdk-study-icon {
@@ -413,29 +493,114 @@
     color: var(--zdk-gold);
   }
 
-  .zdk-study-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    line-height: 1.2;
-  }
-
   .zdk-study-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.9375rem;
+  }
+
+  /* The chevron rotates to point up while the menu is open — a second signal
+     beside the panel itself, since `aria-expanded` is not visible (§32). */
+  .zdk-study-chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    color: var(--zdk-text-dim);
+    transform: rotate(90deg);
+    transition: transform 160ms ease;
+  }
+
+  .zdk-study[aria-expanded='true'] .zdk-study-chevron {
+    transform: rotate(-90deg);
+  }
+
+  /*
+   * The dropdown.
+   *
+   * On a phone it is a sheet pinned to the viewport edges rather than hung off
+   * the button: a 13rem menu anchored to a control near the right edge would
+   * run off the screen, and `position: fixed` with both insets set is what
+   * keeps it on it without measuring anything in JavaScript.
+   */
+  .zdk-studymenu-panel {
+    position: fixed;
+    inset-inline: 0.9rem;
+    top: 4rem;
+    z-index: 30;
+
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 0.85rem;
+    background: var(--zdk-panel-raised);
+    box-shadow: 0 18px 40px rgba(3, 6, 14, 0.6);
+
+    max-height: min(24rem, 60dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .zdk-studymenu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    background: none;
+    color: var(--zdk-text-dim);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .zdk-studymenu-item:hover {
+    background: rgba(233, 238, 247, 0.05);
+    color: var(--zdk-text);
+  }
+
+  .zdk-studymenu-item[aria-current='true'] {
+    background: rgba(217, 184, 118, 0.1);
+    border-color: var(--zdk-line);
+    color: #f7f4ec;
+  }
+
+  .zdk-studymenu-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The tick on the open Study. Colour is not the only signal — aria-current
+     carries it to a screen reader, and this carries it to everyone else. */
+  .zdk-studymenu-tick {
+    flex-shrink: 0;
+    color: var(--zdk-gold);
+  }
+
+  /* The call to action, last. A rule above it separates it from the list: it
+     creates rather than selects, and a create sitting flush among choices is
+     easy to hit by accident. */
+  .zdk-studymenu-cta {
+    margin-top: 0.4rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--zdk-line-soft);
+  }
+
+  .zdk-studymenu-cta .zdk-studymenu-item {
+    color: var(--zdk-gold);
     font-weight: 600;
   }
 
-  /* "Workspace" under the Study name. Hidden on a phone, where the pill has
-     no room for a second line and the word adds nothing. */
-  .zdk-study-kind {
-    display: none;
-    font-size: 0.6875rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--zdk-text-dim);
+  .zdk-studymenu-cta .zdk-studymenu-item:hover {
+    background: rgba(217, 184, 118, 0.12);
   }
 
   /* -----------------------------------------------------------------------
@@ -825,8 +990,17 @@
    * -------------------------------------------------------------------- */
 
   .zdk-composer {
-    position: sticky;
-    bottom: 0;
+    /*
+     * The last item in a fixed-height flex column, so it sits at the bottom
+     * because the thread above it takes the remaining space — not because it
+     * is stuck there.
+     *
+     * It was `position: sticky`, which only pins to the bottom of a scrolling
+     * container. The shell was `min-height`, so nothing scrolled and there was
+     * nothing to stick to: the composer sat wherever the content ended, which
+     * on a short thread was mid-screen with dead space beneath it.
+     */
+    flex-shrink: 0;
     z-index: 20;
     padding: 0.7rem 0.9rem;
     padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
@@ -989,8 +1163,25 @@
       padding-inline: 1.4rem;
     }
 
-    .zdk-study-kind {
+    /* The Study the conversation belongs to, under its title. There is room
+       for the second line from here up. */
+    .zdk-topbar-study {
       display: block;
+    }
+
+    /*
+     * The menu hangs off the button from here up, rather than spanning the
+     * viewport. There is room for it to open under the control it belongs to,
+     * which is where a pointer expects it.
+     *
+     * `end`-aligned because the button sits at the end of the bar: an
+     * `inset-inline-start` anchor would push a wide menu off the edge.
+     */
+    .zdk-studymenu-panel {
+      position: absolute;
+      inset-inline: auto 0;
+      top: calc(100% + 0.5rem);
+      min-width: 16rem;
     }
 
     .zdk-avatar {
@@ -1033,20 +1224,40 @@
    * ==================================================================== */
 
   @media (min-width: 64rem) {
+    /* The height is already the viewport; this only adds the inset margin the
+       backdrop shows through. */
     .zdk-shell {
       flex-direction: row;
-      gap: 0;
-      /* The inset. `100dvh` minus the margin, so the shell is exactly the
-         viewport and only the thread scrolls. */
-      height: 100dvh;
-      min-height: 0;
       padding: 1.1rem;
     }
 
+    /*
+     * The Study switcher moves to the far right.
+     *
+     * `order` rather than reordering the markup: the DOM order is the reading
+     * and tab order, and the switcher belongs after the title there — it
+     * describes the thread. On a wide bar it reads better pinned to the edge,
+     * which is a visual arrangement and so a visual rule.
+     *
+     * Deliberately only from 64rem. On a phone the bar is tight and the pill
+     * sits beside the title, which is what the design has.
+     */
+    .zdk-studymenu {
+      order: 2;
+      margin-inline-start: 0.4rem;
+    }
+
+    .zdk-topbar-more {
+      order: 1;
+    }
+
+    /* Wider, because there is room for a longer workspace name. */
+    .zdk-study {
+      max-width: 16rem;
+    }
+
+    /* From here the frame is a visible panel rather than a pass-through. */
     .zdk-frame {
-      display: flex;
-      flex: 1;
-      min-width: 0;
       overflow: hidden;
       border: 1px solid var(--zdk-line-soft);
       border-radius: 1.1rem;

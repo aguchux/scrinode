@@ -1,7 +1,7 @@
 'use client';
 
 import { ZedekIcon } from '@scrinode/ui';
-import type { Conversation, ZedekMessage } from '@scrinode/types';
+import type { Conversation, Study, ZedekMessage } from '@scrinode/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Composer } from './composer';
 import { Message } from './message';
@@ -26,7 +26,12 @@ import { useZedekStream } from './use-zedek-stream';
  */
 
 export interface WorkspaceProps {
-  readonly studyTitle: string;
+  /** The Study currently open. Undefined before any exists. */
+  readonly activeStudy?: Pick<Study, 'id' | 'title'>;
+  /** Every Study the reader may switch to, for the menu. */
+  readonly studies: readonly Pick<Study, 'id' | 'title'>[];
+  readonly onSelectStudy: (studyId: string) => void;
+  readonly onCreateStudy: () => void;
   readonly conversations: readonly Conversation[];
   readonly messages: readonly ZedekMessage[];
   readonly activeConversationId: string | null;
@@ -38,7 +43,10 @@ export interface WorkspaceProps {
 }
 
 export function Workspace({
-  studyTitle,
+  activeStudy,
+  studies,
+  onSelectStudy,
+  onCreateStudy,
   conversations,
   messages,
   activeConversationId,
@@ -114,6 +122,10 @@ export function Workspace({
 
   const isEmpty = messages.length === 0 && !turn.content && !turn.streaming;
 
+  // The open conversation, for the title in the bar. Looked up rather than
+  // passed separately so the two cannot disagree about which thread is open.
+  const activeConversation = conversations.find((c) => c.id === activeConversationId);
+
   return (
     <div className="zdk-shell">
       {/* The inset frame from 64rem up. Below it the rail is a drawer, so the
@@ -139,7 +151,11 @@ export function Workspace({
 
         <main className="zdk-main">
           <TopBar
-            studyTitle={studyTitle}
+            {...(activeStudy ? { activeStudy } : {})}
+            {...(activeConversation ? { conversationTitle: activeConversation.title } : {})}
+            studies={studies}
+            onSelectStudy={onSelectStudy}
+            onCreateStudy={onCreateStudy}
             onOpenRail={openRail}
             onQuickAction={runQuickAction}
             busy={turn.streaming}

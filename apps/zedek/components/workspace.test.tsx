@@ -1,4 +1,4 @@
-import type { Conversation, ZedekMessage } from '@scrinode/types';
+import type { Conversation, Study, ZedekMessage } from '@scrinode/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Workspace } from './workspace';
@@ -31,8 +31,16 @@ beforeEach(() => {
   Element.prototype.scrollTo = vi.fn();
 });
 
+const STUDIES: readonly Pick<Study, 'id' | 'title'>[] = [
+  { id: 's1', title: 'Romans Study' },
+  { id: 's2', title: 'Advent teaching' },
+];
+
 const base = {
-  studyTitle: 'Romans Study',
+  activeStudy: STUDIES[0] as Pick<Study, 'id' | 'title'>,
+  studies: STUDIES,
+  onSelectStudy: vi.fn(),
+  onCreateStudy: vi.fn(),
   conversations: [] as readonly Conversation[],
   messages: [] as readonly ZedekMessage[],
   activeConversationId: null,
@@ -64,10 +72,24 @@ describe('Workspace', () => {
     expect(screen.getByText(/will say so rather than guess/)).toBeInTheDocument();
   });
 
-  it('names the open Study in the top bar', () => {
+  it('names the open Study on the switcher', () => {
     render(<Workspace {...base} />);
 
-    expect(screen.getByText('Romans Study')).toBeInTheDocument();
+    // On the button, not spread across the bar: the switcher is compact and
+    // the width belongs to the conversation title beside it.
+    // `\s*` because accessible-name computation normalises the separator
+    // between the hidden "Study:" label and the visible name.
+    expect(
+      screen.getByRole('button', { name: /^Study:\s*Romans Study$/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('puts the conversation title on the left', () => {
+    // The page's heading, so a screen-reader user navigating by heading lands
+    // on what they are reading.
+    render(<Workspace {...base} />);
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('New conversation');
   });
 
   it('disables the composer when no conversation is open', () => {

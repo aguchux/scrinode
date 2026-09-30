@@ -213,6 +213,22 @@ The interface rules that are load-bearing:
   a keyboard user tabbing into a panel they cannot see. It closes on Escape and
   on the scrim, and focus moves into it on open and returns to the toggle on
   close (§32).
+- **The composer is pinned by the height chain, not by `sticky`.** The shell is
+  `height: 100dvh` with `overflow: hidden`, every box between it and the
+  composer carries `min-height: 0`, and the thread is the only thing that
+  scrolls. `min-height` on the shell lets it grow but never makes its children
+  fill it, so the composer floated wherever the content ended — mid-screen on a
+  short thread — and `position: sticky` could not help, because it pins to a
+  scrolling ancestor and nothing was scrolling.
+- **The conversation title is on the left; the Study switcher is a compact menu
+  on the right**, moving to the far right of the bar from 64rem via `order`
+  rather than a second markup arrangement — DOM order is reading and tab order,
+  and the switcher belongs after the title there. The switcher must never carry
+  `flex: 1`: that stretched it across the whole bar, overlapped its two lines,
+  and left the title nowhere to sit. Width goes to what changes with every
+  thread, not to what a reader switches occasionally. Its last item is a
+  create, below a rule, because a create flush among choices is easy to hit
+  while scanning for one.
 - **Quick actions are prompts, not features.** Each sends a question through the
   same orchestration as anything typed (§16). They exist because the hardest
   part of a research assistant is knowing what to ask it.

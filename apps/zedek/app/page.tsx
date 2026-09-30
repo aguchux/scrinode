@@ -1,6 +1,6 @@
 'use client';
 
-import type { Conversation, ZedekMessage } from '@scrinode/types';
+import type { Conversation, Study, ZedekMessage } from '@scrinode/types';
 import { useCallback, useState } from 'react';
 import { Workspace } from '../components/workspace';
 
@@ -30,6 +30,8 @@ import { Workspace } from '../components/workspace';
  * and this keeps only the selection.
  */
 export default function ZedekHome() {
+  const [studies] = useState<readonly Pick<Study, 'id' | 'title'>[]>([]);
+  const [activeStudyId, setActiveStudyId] = useState<string | null>(null);
   const [conversations] = useState<readonly Conversation[]>([]);
   const [messages] = useState<readonly ZedekMessage[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -42,9 +44,20 @@ export default function ZedekHome() {
     setActiveConversationId(null);
   }, []);
 
+  const createStudy = useCallback(() => {
+    // Inert until `POST /zedek/studies` exists, for the same reason as a new
+    // conversation: a client-side id would name a workspace the server has
+    // never heard of.
+  }, []);
+
+  const activeStudy = studies.find((study) => study.id === activeStudyId);
+
   return (
     <Workspace
-      studyTitle="Untitled Study"
+      {...(activeStudy ? { activeStudy } : {})}
+      studies={studies}
+      onSelectStudy={setActiveStudyId}
+      onCreateStudy={createStudy}
       conversations={conversations}
       messages={messages}
       activeConversationId={activeConversationId}
