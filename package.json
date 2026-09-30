@@ -17,11 +17,15 @@
     "typecheck": "turbo run typecheck",
     "verify": "turbo run build lint typecheck test --concurrency=4",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "images": "node tooling/images/optimise.mjs",
+    "images:check": "node tooling/images/optimise.mjs --check"
   },
   "devDependencies": {
     "prettier": "^3.4.2",
+    "sharp": "^0.35.4",
     "turbo": "^2.11.2",
     "typescript": "^5.7.3"
-  }
+  },
+  "//images": "sharp is a declared devDependency, not borrowed from Next.js's transitive tree. The landing page's sources arrived at 9.9 MB and optimising them meant reaching into node_modules/.pnpm by path, which breaks whenever Next changes its dependency. Optimised output is committed, so no build step depends on a native library."
 }
