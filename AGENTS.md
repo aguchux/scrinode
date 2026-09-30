@@ -176,6 +176,52 @@ reading session.
   abstraction. Zedek must not import from `apps/web`, and a boundary rule
   enforces it.
 
+### The workspace
+
+`apps/zedek` is a chat workspace, not a landing page — the rail of past
+Conversations, the Study named above the thread, the composer at the bottom.
+There is no marketing surface here; `scrinode.com` is where the product is
+explained, and a reader arrives at Zedek already signed in and wanting to work.
+
+The interface rules that are load-bearing:
+
+- **Classes, never inline styles, for anything a media query governs.** An
+  inline `style` attribute beats every stylesheet rule, so a layout that a
+  breakpoint should collapse silently does not. `styles/workspace.css` holds
+  the layout and contains **no `max-width` media query**; a test asserts it
+  against the file, and the compiled output was checked to confirm the shipped
+  CSS has none either.
+- **The composer is a `textarea`, and it grows.** The questions Zedek exists
+  for are not one line, and an `<input>` scrolls a long one sideways so the
+  reader cannot re-read what they are about to ask. Height is set from
+  `scrollHeight` after resetting to `auto` — without the reset the box grows
+  and never comes back down — in `useLayoutEffect`, so the measurement and the
+  paint share a frame.
+- **Enter sends only where there is a keyboard.** On a touch device Enter
+  inserts a newline, because a phone's return key is how a second sentence gets
+  written and there is no Shift to hold. Detected per-event from
+  `any-pointer: fine`, so a tablet with a keyboard behaves like a desktop.
+  Enter is also ignored while `isComposing` — an IME uses it to accept a
+  candidate, and sending there submits a half-written word. Both are asserted
+  by tests that were verified by deletion.
+- **Every text field is at least 16px.** Below it, iOS zooms the viewport on
+  focus and never zooms back, leaving the layout wrong for the rest of the
+  session. Invisible on a desktop, which is why a test checks it.
+- **`100dvh`, never `100vh`.** `vh` includes mobile Safari's collapsing URL
+  bar, which puts a fixed composer below the fold until the reader scrolls.
+- **The drawer is `visibility: hidden` while closed.** A transform alone leaves
+  a keyboard user tabbing into a panel they cannot see. It closes on Escape and
+  on the scrim, and focus moves into it on open and returns to the toggle on
+  close (§32).
+- **Quick actions are prompts, not features.** Each sends a question through the
+  same orchestration as anything typed (§16). They exist because the hardest
+  part of a research assistant is knowing what to ask it.
+- **Nothing in the interface fabricates content.** The design this was built to
+  shows a worked answer about Romans 8:28; none of it is in the source. With no
+  messages the workspace renders its empty state, and a test asserts that
+  answer is absent — §2.2 and §42 forbid shipping invented Scripture
+  commentary, and a reader cannot tell it from a grounded one.
+
 ### Studies and Conversations
 
 Zedek organises work in two levels, and the names are fixed (§45):

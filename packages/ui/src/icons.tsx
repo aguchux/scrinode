@@ -271,3 +271,112 @@ export function PlayIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/* ---------------------------------------------------------------------------
+ * Workspace chrome.
+ *
+ * Added for Zedek's research workspace, but kept here rather than in the app:
+ * a send arrow, a drawer toggle and a plus are chrome any Scrinode surface
+ * with a composer or a rail will want, and §8 puts genuinely shared primitives
+ * in this package.
+ * ------------------------------------------------------------------------ */
+
+/** A paper-plane send arrow. */
+export function SendIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M21 3 10.5 13.5" />
+      <path d="M21 3 14.4 21l-3.9-7.5L3 9.6Z" />
+    </Icon>
+  );
+}
+
+/** A microphone, for dictation. */
+export function MicIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="9" y="2.6" width="6" height="11" rx="3" />
+      <path d="M5.5 11.4a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 17.9V21.4" />
+    </Icon>
+  );
+}
+
+/** A paperclip, for attachments. */
+export function AttachIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M20.4 11.3 12.2 19.5a5 5 0 0 1-7.1-7.1l8.3-8.3a3.3 3.3 0 1 1 4.7 4.7l-8.2 8.2a1.7 1.7 0 0 1-2.4-2.4l7.6-7.5" />
+    </Icon>
+  );
+}
+
+/** A plus, for "New chat" and other create actions. */
+export function PlusIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </Icon>
+  );
+}
+
+/** Three bars — the drawer toggle on narrow layouts. */
+export function MenuIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h16" />
+    </Icon>
+  );
+}
+
+/** A cross, for closing a drawer or a sheet. */
+export function CloseIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </Icon>
+  );
+}
+
+/** A cog, for settings. */
+export function SettingsIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 14.6a1.5 1.5 0 0 0 .3 1.7l.1.1a1.8 1.8 0 1 1-2.6 2.6l-.1-.1a1.5 1.5 0 0 0-2.5 1v.3a1.8 1.8 0 1 1-3.6 0v-.2a1.5 1.5 0 0 0-2.6-1l-.1.1a1.8 1.8 0 1 1-2.6-2.6l.1-.1a1.5 1.5 0 0 0-1-2.5h-.3a1.8 1.8 0 1 1 0-3.6h.2a1.5 1.5 0 0 0 1-2.6l-.1-.1a1.8 1.8 0 1 1 2.6-2.6l.1.1a1.5 1.5 0 0 0 1.7.3h.1a1.5 1.5 0 0 0 .9-1.4v-.3a1.8 1.8 0 1 1 3.6 0v.2a1.5 1.5 0 0 0 2.5 1l.1-.1a1.8 1.8 0 1 1 2.6 2.6l-.1.1a1.5 1.5 0 0 0-.3 1.7v.1a1.5 1.5 0 0 0 1.4.9h.3a1.8 1.8 0 1 1 0 3.6h-.2a1.5 1.5 0 0 0-1.4.9Z" />
+    </Icon>
+  );
+}
+
+/** Three dots — an overflow menu. */
+export function MoreIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="5.5" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none" />
+      <circle cx="18.5" cy="12" r="1.1" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
+/** A speech bubble — one Conversation in the rail. */
+export function ChatIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M20.4 12.4a7.6 7.6 0 0 1-8.2 7.6 8.6 8.6 0 0 1-2.6-.4L4.6 21l1.4-4.6a7.6 7.6 0 0 1-1.4-4.4 7.6 7.6 0 0 1 7.6-7.6h.4a7.6 7.6 0 0 1 7.8 7.6Z" />
+    </Icon>
+  );
+}
+
+/** A Greek alpha — the original-language quick action. */
+export function AlphaIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M16.2 17.8c-1.5 0-2.3-1-2.8-2.7l-1.2-4.2C11.6 8.7 10.4 7 8.4 7 6 7 4.6 9.3 4.6 12.4c0 3.2 1.4 5.4 3.6 5.4 2 0 3.3-1.6 4.1-3.9l1.3-4c.6-1.8 1.4-2.9 2.9-2.9" />
+    </Icon>
+  );
+}

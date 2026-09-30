@@ -1,0 +1,1096 @@
+/* ===========================================================================
+ * Zedek workspace — layout, chrome and thread.
+ *
+ * Classes, not inline styles. This is not a preference: an inline `style`
+ * attribute beats every stylesheet rule, so a media query that collapses a
+ * layout silently does nothing against one. That exact bug shipped on the
+ * landing page — three preview panes carried inline `display: flex` and a
+ * phone rendered all three squeezed to one word per line (§5).
+ *
+ * Mobile-first throughout. There is **no `max-width` media query in this
+ * file**, and adding one should be read as a layout built the wrong way round.
+ * The phone rules are what the stylesheet says with no query at all; every
+ * query is a `min-width` that adds capability as space allows.
+ *
+ * Breakpoints, and what each buys:
+ *
+ *   (base)     phone     one column, rail off-canvas, composer fixed to the
+ *                        bottom, quick actions scroll horizontally
+ *   48rem      tablet    wider gutters, the Study switcher gains its label,
+ *                        messages take an avatar column
+ *   64rem      desktop   the rail becomes permanent and the shell insets from
+ *                        the viewport edge onto the backdrop — the mockup
+ * ======================================================================== */
+
+@layer components {
+  /* -----------------------------------------------------------------------
+   * Shell
+   *
+   * The dark surface is fixed here rather than taken from the theme tokens.
+   * Zedek's workspace is a dark room by design — the mockup is lit like one —
+   * and a light variant would be a different design, not a recolour. The
+   * reader's light/dark preference still governs scrinode.com.
+   * -------------------------------------------------------------------- */
+
+  .zdk-shell {
+    --zdk-ink: #0b1220;
+    --zdk-panel: #101a2c;
+    --zdk-panel-raised: #16223a;
+    --zdk-line: rgba(197, 162, 83, 0.22);
+    --zdk-line-soft: rgba(233, 238, 247, 0.1);
+    --zdk-gold: #d9b876;
+    --zdk-gold-dim: rgba(217, 184, 118, 0.6);
+    --zdk-text: #eef2f8;
+    --zdk-text-dim: #9dabc2;
+
+    /* The rail's width, referenced by the rail and by the desktop offset so
+       the two cannot drift apart. */
+    --zdk-rail: 17.5rem;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    /* Dynamic viewport height, not `100vh`. On mobile Safari `vh` includes the
+       collapsing URL bar, so a fixed composer sits below the fold until the
+       reader scrolls — the single most common mobile chat bug. */
+    min-height: 100dvh;
+
+    color: var(--zdk-text);
+    font-family: var(--font-ui);
+    background-color: var(--zdk-ink);
+  }
+
+  /* The photographic backdrop.
+     A pseudo-element rather than a `background-image` on the shell, so it can
+     be blurred and dimmed without touching the content above it. Fixed and
+     behind everything; on a phone it is almost entirely covered, which is why
+     the asset is only 98 KB. */
+  .zdk-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/workspace-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    /* The scrim. Without it the photograph competes with the text and §32's
+       contrast ratios fail against the bright areas. */
+    opacity: 0.32;
+    filter: blur(2px);
+    pointer-events: none;
+  }
+
+  .zdk-shell::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+      160deg,
+      rgba(11, 18, 32, 0.82) 0%,
+      rgba(11, 18, 32, 0.94) 55%,
+      rgba(11, 18, 32, 0.99) 100%
+    );
+    pointer-events: none;
+  }
+
+  .zdk-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Rail — off-canvas on a phone, permanent from 64rem
+   * -------------------------------------------------------------------- */
+
+  .zdk-rail {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 40;
+
+    display: flex;
+    flex-direction: column;
+    width: min(var(--zdk-rail), 86vw);
+
+    background: var(--zdk-panel);
+    border-inline-end: 1px solid var(--zdk-line-soft);
+
+    /* Off-canvas by transform rather than `display: none`, so the panel keeps
+       its size and the slide has something to animate. */
+    transform: translateX(-100%);
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* `visibility` is what removes it from the tab order and the accessibility
+       tree while closed. A transform alone leaves a keyboard user tabbing into
+       a panel they cannot see (§32). */
+    visibility: hidden;
+  }
+
+  .zdk-rail[data-open='true'] {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  /* The scrim behind an open rail. Tapping it closes — the gesture every
+     drawer on a phone has taught people to expect. */
+  .zdk-rail-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    border: 0;
+    padding: 0;
+    background: rgba(5, 9, 17, 0.62);
+    cursor: pointer;
+  }
+
+  .zdk-rail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.15rem 1.15rem 0.9rem;
+  }
+
+  .zdk-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .zdk-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.05;
+  }
+
+  .zdk-brand-name {
+    font-family: var(--font-scripture);
+    font-size: 1.35rem;
+    letter-spacing: -0.015em;
+    color: #f7f4ec;
+  }
+
+  /* "— ZEDEK" under the wordmark, as in the mockup. */
+  .zdk-brand-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.22rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--zdk-gold);
+  }
+
+  .zdk-brand-sub::before {
+    content: '';
+    width: 0.85rem;
+    height: 1px;
+    background: var(--zdk-gold-dim);
+  }
+
+  .zdk-rail-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 0.85rem 1rem;
+    /* Momentum scrolling without the scroll chaining that otherwise moves the
+       thread underneath when the list reaches its end. */
+    overscroll-behavior: contain;
+  }
+
+  .zdk-rail-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.85rem 1.15rem;
+    /* `env()` keeps the account row clear of a phone's home indicator. */
+    padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--zdk-line-soft);
+  }
+
+  /* -----------------------------------------------------------------------
+   * New chat + search
+   * -------------------------------------------------------------------- */
+
+  .zdk-newchat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: calc(100% - 1.7rem);
+    margin: 0 0.85rem 0.85rem;
+    /* 44px: §32's touch target, and the rail is used on tablets. */
+    min-height: 2.875rem;
+    padding: 0 1rem;
+    border: 1px solid var(--zdk-gold-dim);
+    border-radius: 0.7rem;
+    background: rgba(217, 184, 118, 0.08);
+    color: var(--zdk-gold);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .zdk-newchat:hover {
+    background: rgba(217, 184, 118, 0.16);
+    border-color: var(--zdk-gold);
+  }
+
+  .zdk-search {
+    position: relative;
+    margin: 0 0.85rem 1.15rem;
+  }
+
+  .zdk-search-input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 0.9rem 0 2.4rem;
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 0.7rem;
+    background: rgba(8, 13, 24, 0.55);
+    color: var(--zdk-text);
+    font: inherit;
+    /* 16px. Below it, iOS zooms the viewport on focus and never zooms back —
+       the layout is then wrong for the rest of the session. */
+    font-size: 1rem;
+  }
+
+  .zdk-search-input::placeholder {
+    color: var(--zdk-text-dim);
+  }
+
+  .zdk-search-icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0.8rem;
+    transform: translateY(-50%);
+    color: var(--zdk-text-dim);
+    pointer-events: none;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Conversation list
+   * -------------------------------------------------------------------- */
+
+  .zdk-group-label {
+    margin: 0.35rem 0 0.4rem;
+    padding: 0 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--zdk-text-dim);
+  }
+
+  .zdk-convo-list {
+    list-style: none;
+    margin: 0 0 1.1rem;
+    padding: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .zdk-convo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 0.6rem;
+    background: none;
+    color: var(--zdk-text-dim);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: start;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease;
+  }
+
+  .zdk-convo:hover {
+    background: rgba(233, 238, 247, 0.05);
+    color: var(--zdk-text);
+  }
+
+  /* The selected thread. A border and a colour change, never colour alone:
+     §32 forbids signalling state by colour only, and `aria-current` on the
+     element carries it to a screen reader. */
+  .zdk-convo[aria-current='true'] {
+    background: rgba(217, 184, 118, 0.1);
+    border-color: var(--zdk-line);
+    color: #f7f4ec;
+  }
+
+  .zdk-convo-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .zdk-convo-time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--zdk-text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Main column
+   * -------------------------------------------------------------------- */
+
+  .zdk-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .zdk-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--zdk-line-soft);
+    background: rgba(11, 18, 32, 0.72);
+    backdrop-filter: blur(12px);
+    /* Sticky rather than fixed: it stays put while the thread scrolls without
+       being taken out of flow, so it cannot overlap the first message. */
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  /* The hamburger. Hidden once the rail is permanent. */
+  .zdk-rail-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 0.6rem;
+    background: none;
+    color: var(--zdk-text);
+    cursor: pointer;
+  }
+
+  /* The Study switcher — the gold pill in the mockup. */
+  .zdk-study {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 999px;
+    background: rgba(217, 184, 118, 0.07);
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .zdk-study-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--zdk-gold);
+  }
+
+  .zdk-study-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .zdk-study-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  /* "Workspace" under the Study name. Hidden on a phone, where the pill has
+     no room for a second line and the word adds nothing. */
+  .zdk-study-kind {
+    display: none;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--zdk-text-dim);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Quick actions
+   *
+   * A horizontal scroller on a phone rather than a wrap: four pills wrapped to
+   * two rows cost a third of the first screen, and the thread is what the
+   * reader came for.
+   * -------------------------------------------------------------------- */
+
+  .zdk-actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--zdk-line-soft);
+    /* Snap so a half-visible pill does not look like a rendering fault. */
+    scroll-snap-type: x proximity;
+  }
+
+  .zdk-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The li wrapping each pill. It must not collapse the flex row, so it is a
+     flex item in its own right rather than `display: contents` — which several
+     browsers drop from the accessibility tree, taking the list semantics with
+     it. */
+  .zdk-actions-item {
+    display: flex;
+    flex-shrink: 0;
+    /* The snap target is the item, not the pill inside it: the pill is no
+       longer the direct child of the scroll container. */
+    scroll-snap-align: start;
+  }
+
+  .zdk-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+    min-height: 2.5rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 999px;
+    background: rgba(233, 238, 247, 0.04);
+    color: var(--zdk-text);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+
+  .zdk-action:hover {
+    border-color: var(--zdk-line);
+    background: rgba(217, 184, 118, 0.08);
+  }
+
+  .zdk-action-icon {
+    display: inline-flex;
+    color: var(--zdk-gold);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Thread
+   * -------------------------------------------------------------------- */
+
+  .zdk-thread {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: 1.1rem 0.9rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  .zdk-turn {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+  }
+
+  /* A reader's own message sits right, as the mockup has it. */
+  .zdk-turn[data-role='user'] {
+    flex-direction: row-reverse;
+  }
+
+  /* The avatar column. Hidden on a phone: at 360px it costs 15% of the width
+     to repeat what the alignment and the label already say. */
+  .zdk-avatar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 1px solid var(--zdk-line);
+    background: var(--zdk-panel-raised);
+    color: var(--zdk-gold);
+    overflow: hidden;
+  }
+
+  .zdk-bubble {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .zdk-turn[data-role='user'] .zdk-bubble {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(53, 80, 112, 0.5);
+    border-radius: 1rem 1rem 0.25rem 1rem;
+    background: linear-gradient(140deg, #1d2d48 0%, #17263d 100%);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .zdk-turn[data-role='assistant'] .zdk-bubble {
+    flex: 1;
+  }
+
+  /* "Zedek · 9:08 AM". A label, not only a colour — §32 again: "who said
+     this" is a state, and colour alone cannot carry it. */
+  .zdk-byline {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--zdk-gold);
+  }
+
+  .zdk-turn[data-role='user'] .zdk-byline {
+    justify-content: flex-end;
+    color: var(--zdk-text-dim);
+  }
+
+  .zdk-time {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    color: var(--zdk-text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zdk-prose {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.68;
+    color: #dfe6f1;
+    /* A long unbroken token — a URL, a transliteration — must wrap rather than
+       widen the column and give the whole page a horizontal scrollbar. */
+    overflow-wrap: anywhere;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Answer sections — the numbered blocks in the mockup
+   * -------------------------------------------------------------------- */
+
+  .zdk-sections {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0.9rem 0.9rem 0.95rem;
+    display: grid;
+    gap: 1rem;
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 0.9rem;
+    background: rgba(16, 26, 44, 0.66);
+  }
+
+  .zdk-section {
+    display: grid;
+    /* The numeral column, then the body. `min-content` rather than a fixed
+       width so a two-digit numeral is not clipped. */
+    grid-template-columns: min-content 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .zdk-section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 50%;
+    color: var(--zdk-gold);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zdk-section-title {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-scripture);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--zdk-gold);
+  }
+
+  .zdk-section-body {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.62;
+    color: #cfd8e6;
+  }
+
+  /* Reference chips — "Rom 8:18–30 ›". Full width on a phone so the tap target
+     is unambiguous; they shrink to content once there is room. */
+  .zdk-refs {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.55rem 0 0;
+    padding: 0;
+  }
+
+  .zdk-ref {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 999px;
+    background: rgba(217, 184, 118, 0.06);
+    color: var(--zdk-gold);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .zdk-ref:hover {
+    background: rgba(217, 184, 118, 0.14);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Citations
+   *
+   * Scripture, rendered as Scripture: the reading serif, its reference
+   * attributed, a rule down the left. §1 makes the Bible the foundational
+   * interface rather than a footnote to AI prose, and §2.4 requires the two
+   * stay visibly distinct.
+   * -------------------------------------------------------------------- */
+
+  .zdk-citations {
+    list-style: none;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .zdk-citation {
+    border-inline-start: 2px solid var(--zdk-gold-dim);
+    padding-inline-start: 0.85rem;
+  }
+
+  .zdk-citation-text {
+    margin: 0;
+    font-family: var(--font-scripture);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #e8edf6;
+  }
+
+  .zdk-citation-ref {
+    margin: 0.3rem 0 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--zdk-text-dim);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Outline card — the sermon-outline block over photography
+   * -------------------------------------------------------------------- */
+
+  .zdk-outline {
+    position: relative;
+    overflow: hidden;
+    margin: 0.9rem 0 0;
+    padding: 1rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 0.9rem;
+    background:
+      linear-gradient(120deg, rgba(11, 18, 32, 0.93) 0%, rgba(11, 18, 32, 0.74) 100%),
+      var(--zdk-panel-raised);
+  }
+
+  .zdk-outline-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .zdk-outline-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 0.65rem;
+    background: rgba(217, 184, 118, 0.1);
+    color: var(--zdk-gold);
+  }
+
+  .zdk-outline-kind {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--zdk-gold);
+  }
+
+  .zdk-outline-title {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-scripture);
+    font-size: 1.05rem;
+    color: #f4f0e6;
+  }
+
+  .zdk-outline-ref {
+    margin: 0.15rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--zdk-text-dim);
+  }
+
+  /* -----------------------------------------------------------------------
+   * Status and errors
+   * -------------------------------------------------------------------- */
+
+  .zdk-status {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.8125rem;
+    color: var(--zdk-text-dim);
+  }
+
+  .zdk-status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--zdk-gold);
+    animation: zdk-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes zdk-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .zdk-error {
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgba(224, 123, 123, 0.45);
+    border-radius: 0.7rem;
+    background: rgba(224, 123, 123, 0.1);
+    color: #f0c4c4;
+    font-size: 0.875rem;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Composer
+   *
+   * Multi-line, auto-growing, and the one place on a phone that must never be
+   * scrolled away from.
+   * -------------------------------------------------------------------- */
+
+  .zdk-composer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 0.7rem 0.9rem;
+    padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--zdk-line-soft);
+    background: rgba(11, 18, 32, 0.9);
+    backdrop-filter: blur(12px);
+  }
+
+  .zdk-composer-box {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.4rem 0.4rem 0.4rem 0.75rem;
+    border: 1px solid var(--zdk-line-soft);
+    border-radius: 1.1rem;
+    background: rgba(8, 13, 24, 0.7);
+    transition: border-color 160ms ease;
+  }
+
+  /* Focus lands on the textarea, but the ring belongs on the box the reader
+     sees as one control. */
+  .zdk-composer-box:focus-within {
+    border-color: var(--zdk-gold-dim);
+  }
+
+  .zdk-composer-input {
+    flex: 1;
+    min-width: 0;
+    /* One line at rest, growing to six before it scrolls. Set in JS from the
+       scroll height; these bounds are the guardrails. */
+    min-height: 2.5rem;
+    max-height: 11rem;
+    padding: 0.6rem 0;
+    border: 0;
+    background: none;
+    color: var(--zdk-text);
+    font: inherit;
+    /* 16px, for the same iOS zoom reason as the search field. */
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    /* The box carries the focus ring, so a second one inside it is noise. */
+    outline: none;
+  }
+
+  .zdk-composer-input::placeholder {
+    color: var(--zdk-text-dim);
+  }
+
+  .zdk-composer-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    /* 44px. The send button is the most-tapped control in the product. */
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 0.8rem;
+    background: linear-gradient(135deg, #e3c884 0%, #c5a253 52%, #ae8c40 100%);
+    color: #141c2c;
+    cursor: pointer;
+  }
+
+  .zdk-composer-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .zdk-composer-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 0.7rem;
+    background: none;
+    color: var(--zdk-text-dim);
+    cursor: pointer;
+  }
+
+  .zdk-composer-icon:hover {
+    color: var(--zdk-gold);
+  }
+
+  /* The Enter-to-send hint. Hidden on a phone, where Enter inserts a newline
+     and there is no keyboard shortcut to describe. */
+  .zdk-composer-hint {
+    display: none;
+    margin: 0.4rem 0 0;
+    font-size: 0.6875rem;
+    color: var(--zdk-text-dim);
+    text-align: center;
+  }
+
+  /* -----------------------------------------------------------------------
+   * Empty state (§44)
+   * -------------------------------------------------------------------- */
+
+  .zdk-empty {
+    margin: auto;
+    max-width: 34rem;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  .zdk-empty-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--zdk-line);
+    border-radius: 50%;
+    background: rgba(217, 184, 118, 0.08);
+    color: var(--zdk-gold);
+  }
+
+  .zdk-empty-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-scripture);
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #f4f0e6;
+  }
+
+  .zdk-empty-body {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--zdk-text-dim);
+  }
+
+  /* Visually hidden, still announced. For labels a sighted reader gets from
+     layout and a screen-reader user would otherwise lose (§32). */
+  .zdk-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* =======================================================================
+   * 48rem — tablet
+   * ==================================================================== */
+
+  @media (min-width: 48rem) {
+    .zdk-topbar,
+    .zdk-actions,
+    .zdk-thread,
+    .zdk-composer {
+      padding-inline: 1.4rem;
+    }
+
+    .zdk-study-kind {
+      display: block;
+    }
+
+    .zdk-avatar {
+      display: inline-flex;
+    }
+
+    .zdk-thread {
+      gap: 1.75rem;
+    }
+
+    /* A measure. Beyond roughly 70 characters the eye loses the line start on
+       the way back, which matters more here than anywhere: this is a reading
+       surface (§6). */
+    .zdk-bubble {
+      max-width: 48rem;
+    }
+
+    .zdk-turn[data-role='user'] .zdk-bubble {
+      max-width: 34rem;
+    }
+
+    .zdk-sections {
+      padding: 1.1rem 1.25rem 1.2rem;
+    }
+
+    .zdk-outline {
+      padding: 1.25rem;
+    }
+
+    .zdk-composer-hint {
+      display: block;
+    }
+  }
+
+  /* =======================================================================
+   * 64rem — desktop: the mockup
+   *
+   * The rail becomes permanent and the shell insets from the viewport edge so
+   * the backdrop shows around it.
+   * ==================================================================== */
+
+  @media (min-width: 64rem) {
+    .zdk-shell {
+      flex-direction: row;
+      gap: 0;
+      /* The inset. `100dvh` minus the margin, so the shell is exactly the
+         viewport and only the thread scrolls. */
+      height: 100dvh;
+      min-height: 0;
+      padding: 1.1rem;
+    }
+
+    .zdk-frame {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--zdk-line-soft);
+      border-radius: 1.1rem;
+      background: rgba(11, 18, 32, 0.88);
+      box-shadow: 0 24px 60px rgba(3, 6, 14, 0.55);
+    }
+
+    .zdk-rail {
+      position: static;
+      transform: none;
+      visibility: visible;
+      width: var(--zdk-rail);
+      flex-shrink: 0;
+      background: rgba(13, 21, 36, 0.92);
+    }
+
+    /* The scrim and the hamburger have no job once the rail is permanent. */
+    .zdk-rail-scrim,
+    .zdk-rail-toggle {
+      display: none;
+    }
+
+    .zdk-thread {
+      padding-block: 1.6rem 2rem;
+    }
+  }
+
+  /* =======================================================================
+   * Reduced motion
+   *
+   * The drawer slide and the status pulse are the two things that move. Under
+   * the setting the drawer appears at once — same information, no movement.
+   * The global reset in globals.css already flattens durations; this removes
+   * the transform so the panel does not appear to jump.
+   * ==================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .zdk-rail {
+      transition: none;
+    }
+
+    .zdk-status-dot {
+      animation: none;
+      opacity: 1;
+    }
+  }
+}
