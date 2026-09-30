@@ -171,19 +171,222 @@
  * breakpoint per screen size (AGENTS.md §5).
  * ------------------------------------------------------------------------ */
 @layer components {
-  /* The header's nav and tagline are the two things that genuinely cannot fit
-     on a phone. Hidden below the desktop breakpoint rather than wrapped: a
-     wrapped nav pushes the hero off the first screen. The links move into the
-     menu toggle instead, so nothing is lost (§5). */
+  /* -------------------------------------------------------------------------
+   * The site header.
+   *
+   * Mobile first: what follows with no media query IS the phone layout —
+   * wordmark, the waitlist button, a menu button. The inline links and the
+   * separate Sign In appear only once there is room for them.
+   *
+   * Everything about visibility lives here rather than in a style attribute,
+   * because an inline `display` beats any stylesheet rule and would make these
+   * queries silently inert (§5).
+   * ---------------------------------------------------------------------- */
+  .scrinode-header {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem clamp(1rem, 4vw, 2.75rem);
+    /* The same cap and gutters as every section below, so the wordmark lines
+       up with the hero's headline rather than drifting to the viewport edge. */
+    max-width: 84rem;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .scrinode-header-brand {
+    text-decoration: none;
+    flex-shrink: 0;
+    /* Never the element that shrinks: the wordmark is the page's identity. */
+    min-width: 0;
+  }
+
+  .scrinode-header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* 44px, §32's minimum touch target — for the menu button above all, since it
+     is the only way to navigate on a phone. */
+  .scrinode-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(247, 244, 236, 0.18);
+    background: transparent;
+    color: rgba(247, 244, 236, 0.86);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .scrinode-icon-button:hover {
+    background: rgba(247, 244, 236, 0.08);
+  }
+
+  /* Hidden on a phone, not because they do not matter but because the bar
+     cannot hold them. Both reappear below, in the menu and at width. */
   .scrinode-nav,
   .scrinode-tagline,
-  .scrinode-header-search,
   .scrinode-signin {
     display: none;
   }
 
-  .scrinode-menu-toggle {
-    display: inline-flex !important;
+  /* The search button needs width the phone bar does not have; the menu holds
+     navigation instead, and search returns with the inline nav. */
+  .scrinode-header-actions > .scrinode-icon-button:not(.scrinode-menu-toggle) {
+    display: none;
+  }
+
+  .scrinode-nav-link {
+    font-size: 0.875rem;
+    text-decoration: none;
+    white-space: nowrap;
+    color: rgba(247, 244, 236, 0.92);
+  }
+
+  .scrinode-nav-link-pending {
+    color: rgba(247, 244, 236, 0.45);
+    cursor: default;
+  }
+
+  /* A menu row: a full-width touch target, not a line of text with a hover
+     state. 0.8rem of padding on a 0.9375rem line clears 44px (§32). */
+  .scrinode-nav-link-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.8rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  a.scrinode-nav-link-block:hover {
+    background: rgba(247, 244, 236, 0.07);
+  }
+
+  /* "Soon" says what a dimmed label cannot. §32 forbids colour as the only
+     indicator of state, and this is that rule applied to navigation. */
+  .scrinode-nav-soon {
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(211, 177, 105, 0.72);
+    border: 1px solid rgba(211, 177, 105, 0.28);
+    border-radius: 999px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .scrinode-mobile-menu {
+    position: absolute;
+    top: calc(100% - 0.25rem);
+    left: clamp(1rem, 4vw, 2.75rem);
+    right: clamp(1rem, 4vw, 2.75rem);
+    z-index: 30;
+    padding: 0.5rem;
+    border-radius: 0.85rem;
+    background: rgba(16, 21, 31, 0.98);
+    border: 1px solid rgba(247, 244, 236, 0.12);
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.65);
+    /* Never taller than the screen: a menu that scrolls off has items nobody
+       can reach. */
+    max-height: calc(100dvh - 5rem);
+    overflow-y: auto;
+  }
+
+  .scrinode-mobile-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .scrinode-mobile-menu-footer {
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(247, 244, 236, 0.1);
+  }
+
+  .scrinode-mobile-menu-signin {
+    display: block;
+    padding: 0.8rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    color: rgba(247, 244, 236, 0.92);
+    text-decoration: none;
+  }
+
+  .scrinode-mobile-menu-signin:hover {
+    background: rgba(247, 244, 236, 0.07);
+  }
+
+  /* The waitlist label shortens before anything is dropped: the call to action
+     stays in the bar at every width because it is the page's purpose. */
+  .scrinode-cta-short {
+    display: inline;
+  }
+
+  .scrinode-cta-long {
+    display: none;
+  }
+
+  @media (min-width: 26rem) {
+    .scrinode-cta-short {
+      display: none;
+    }
+
+    .scrinode-cta-long {
+      display: inline;
+    }
+  }
+
+  /* Tablets and up: the links come inline and the menu button retires. 64rem
+     is where six labels plus the actions fit without crowding — measured
+     against the longest set, not guessed. */
+  @media (min-width: 64rem) {
+    .scrinode-header {
+      gap: 1.25rem;
+      padding: 0.85rem clamp(1rem, 4vw, 2.75rem);
+    }
+
+    .scrinode-nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(0.9rem, 1.8vw, 1.6rem);
+      margin-left: 1rem;
+    }
+
+    .scrinode-signin {
+      display: inline;
+      font-size: 0.875rem;
+      color: rgba(247, 244, 236, 0.86);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .scrinode-header-actions {
+      gap: 1rem;
+    }
+
+    .scrinode-header-actions > .scrinode-icon-button:not(.scrinode-menu-toggle) {
+      display: inline-flex;
+      border-radius: 999px;
+    }
+
+    .scrinode-menu-toggle {
+      display: none;
+    }
+
+    .scrinode-tagline {
+      display: block;
+    }
   }
 
   /* Every landing grid is one column by default and gains columns as width
@@ -239,23 +442,6 @@
   }
 
   @media (min-width: 72rem) {
-    .scrinode-nav,
-    .scrinode-header-search {
-      display: flex;
-    }
-
-    .scrinode-signin {
-      display: inline;
-    }
-
-    .scrinode-tagline {
-      display: block;
-    }
-
-    .scrinode-menu-toggle {
-      display: none !important;
-    }
-
     /* The hero's two columns. The preview takes the larger share because it
        carries three panes of its own and each needs room to stay legible;
        below this width it sits under the copy at full width rather than being
